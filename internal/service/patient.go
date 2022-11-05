@@ -17,15 +17,15 @@ func NewPatientService(repo *repository.Repository, cfg *config.Configs) Patient
 		cfg:         cfg,
 	}
 }
-func (s *patientService) UpdatePatient(models.UpdatePatientRequest) (models.GetPatientResponse, error) {
-
+func (s *patientService) UpdatePatient(patientReq *models.UpdatePatientRequest) (*models.GetPatientResponse, error) {
+	return s.UpdatePatient(patientReq)
 }
-func (s *patientService) CreatePatient(models.CreatePatientRequest) (models.CreatePatientRequest, error) {
-
+func (s *patientService) CreatePatient(patientReq *models.CreatePatientRequest) (*models.CreatePatientRequest, error) {
+	return s.CreatePatient(patientReq)
 }
 func (s *patientService) DeletePatient(ID int64) error {
-
+	return s.DeletePatient(ID)
 }
 func (s *patientService) GetPatient(ID int64) error {
-
+	return s.GetPatient(ID)
 }

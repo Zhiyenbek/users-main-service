@@ -18,15 +18,15 @@ func NewDoctorService(repo *repository.Repository, cfg *config.Configs) DoctorSe
 	}
 }
 
-func (s *doctorService) UpdateDoctor(models.UpdateDoctorRequest) (models.GetDoctorResponse, error) {
-
+func (s *doctorService) UpdateDoctor(doctorReq *models.UpdateDoctorRequest) (*models.GetDoctorResponse, error) {
+	return s.doctorRepo.UpdateDoctor(doctorReq)
 }
-func (s *doctorService) CreateDoctor(models.CreateDoctorRequest) (models.CreateDoctorRequest, error) {
-
+func (s *doctorService) CreateDoctor(doctorReq *models.CreateDoctorRequest) (*models.CreateDoctorResponse, error) {
+	return s.doctorRepo.CreateDoctor(doctorReq)
 }
 func (s *doctorService) DeleteDoctor(ID int64) error {
-
+	return s.doctorRepo.DeleteDoctor(ID)
 }
 func (s *doctorService) GetDoctor(ID int64) error {
-
+	return s.doctorRepo.DeleteDoctor(ID)
 }

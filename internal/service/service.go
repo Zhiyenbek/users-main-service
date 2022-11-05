@@ -7,14 +7,14 @@ import (
 )
 
 type DoctorService interface {
-	UpdateDoctor(models.UpdateDoctorRequest) (models.GetDoctorResponse, error)
-	CreateDoctor(models.CreateDoctorRequest) (models.CreateDoctorRequest, error)
+	UpdateDoctor(doctorReq *models.UpdateDoctorRequest) (*models.GetDoctorResponse, error)
+	CreateDoctor(doctorReq *models.CreateDoctorRequest) (*models.CreateDoctorRequest, error)
 	DeleteDoctor(ID int64) error
 	GetDoctor(ID int64) error
 }
 type PatientService interface {
-	UpdatePatient(models.UpdatePatientRequest) (models.GetPatientResponse, error)
-	CreatePatient(models.CreatePatientRequest) (models.CreatePatientRequest, error)
+	UpdatePatient(pateintReq *models.UpdatePatientRequest) (*models.GetPatientResponse, error)
+	CreatePatient(pateintReq *models.CreatePatientRequest) (*models.CreatePatientRequest, error)
 	DeletePatient(ID int64) error
 	GetPatient(ID int64) error
 }
