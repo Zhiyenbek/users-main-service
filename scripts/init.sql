@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS patients (
 
 CREATE TABLE IF NOT EXISTS doctors (
   id bigserial,
-  department_id bigint NOT NULL,
+  department_id int NOT NULL,
   spec_id int not NULL, 
   experience int not NULL, 
   photo text not NULL, 
