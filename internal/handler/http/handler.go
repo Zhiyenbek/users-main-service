@@ -24,17 +24,33 @@ func New(services *service.Service, cfg *config.Configs) Handler {
 
 func (h *handler) InitRoutes() *gin.Engine {
 	router := gin.Default()
-	router.POST("/sign-in", h.SignIn)
-	patient := router.Group("/patient")
+	patient := router.Group("/patients")
 
-	patient.PUT("/:doctor_id", h.UpdatePatient)
-	patient.GET("/:doctor_id", h.GetPatient)
+	patient.PUT("/:patient_id", h.UpdatePatient)
+	patient.GET("/:patient_id", h.GetPatient)
 	patient.POST("/sign_up", h.RegisterPatient)
 
-	doctor := router.Group("/doctor")
+	doctor := router.Group("/doctors")
 	doctor.POST("/sign-up", h.RegisterDoctor)
 	doctor.PUT("/:doctor_id", h.UpdateDoctor)
 	doctor.GET("/:doctor_id", h.GetDoctor)
 
 	return router
+}
+
+func sendResponse(status int, data interface{}, err error) gin.H {
+	var errResponse gin.H
+	if err != nil {
+		errResponse = gin.H{
+			"message": err.Error(),
+		}
+	} else {
+		errResponse = nil
+	}
+
+	return gin.H{
+		"data":   data,
+		"status": status,
+		"error":  errResponse,
+	}
 }
