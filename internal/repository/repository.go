@@ -18,6 +18,10 @@ type DoctorRepository interface {
 	GetDoctor(ID int64) (*models.GetDoctorResponse, error)
 }
 type PatientRepository interface {
+	CreatePatient(*models.CreatePatientRequest) (*models.CreatePatientResponse, error)
+	DeletePatient(ID int64) error
+	UpdatePatient(*models.UpdatePatientRequest) (*models.GetPatientResponse, error)
+	GetPatient(ID int64) (*models.GetPatientResponse, error)
 }
 type AdminRepository interface {
 	CheckAuth(ID int64) error
