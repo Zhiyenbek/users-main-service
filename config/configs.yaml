@@ -1,0 +1,16 @@
+app:
+  port: 2323
+  host: bruhh
+db:
+  host: postgres
+  port: 5432
+  user: postgres
+  password: postgres
+  db_name: users
+  ssl_mode: disable
+  timeout: 20
+redis:
+  host: 
+  port: 
+  db: 
+
