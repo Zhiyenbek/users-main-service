@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/Zhiyenbek/users-main-service/config"
+	"github.com/Zhiyenbek/users-main-service/internal/models"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
@@ -11,6 +12,10 @@ type Repository struct {
 	AdminRepository
 }
 type DoctorRepository interface {
+	CreateDoctor(*models.CreateDoctorRequest) (*models.CreateDoctorResponse, error)
+	DeleteDoctor(ID int64) error
+	UpdateDoctor(*models.UpdateDoctorRequest) (*models.GetDoctorResponse, error)
+	GetDoctor(ID int64) (*models.GetDoctorResponse, error)
 }
 type PatientRepository interface {
 }
