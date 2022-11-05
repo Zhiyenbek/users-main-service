@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"github.com/Zhiyenbek/users-auth-service/config"
-	"github.com/Zhiyenbek/users-auth-service/internal/service"
+	"github.com/Zhiyenbek/users-main-service/config"
+	"github.com/Zhiyenbek/users-main-service/internal/service"
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,14 +27,14 @@ func (h *handler) InitRoutes() *gin.Engine {
 	router.POST("/sign-in", h.SignIn)
 	patient := router.Group("/patient")
 
-	patient.POST("", h.UpdatePatient)
-	patient.GET("", h.GetPatient)
+	patient.PUT("/:doctor_id", h.UpdatePatient)
+	patient.GET("/:doctor_id", h.GetPatient)
 	patient.POST("/sign_up", h.RegisterPatient)
 
 	doctor := router.Group("/doctor")
 	doctor.POST("/sign-up", h.RegisterDoctor)
-	doctor.PUT("", h.UpdateDoctor)
-	doctor.GET("", h.GetDoctor)
+	doctor.PUT("/:doctor_id", h.UpdateDoctor)
+	doctor.GET("/:doctor_id", h.GetDoctor)
 
 	return router
 }

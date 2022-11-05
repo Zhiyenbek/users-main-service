@@ -1,12 +1,10 @@
 package service
 
 import (
-	"github.com/Zhiyenbek/users-auth-service/config"
-	"github.com/Zhiyenbek/users-auth-service/internal/repository"
+	"github.com/Zhiyenbek/users-main-service/config"
+	"github.com/Zhiyenbek/users-main-service/internal/models"
+	"github.com/Zhiyenbek/users-main-service/internal/repository"
 )
-
-type DoctorService interface {
-}
 
 type doctorService struct {
 	doctorRepo repository.DoctorRepository
@@ -18,4 +16,17 @@ func NewDoctorService(repo *repository.Repository, cfg *config.Configs) DoctorSe
 		doctorRepo: repo.DoctorRepository,
 		cfg:        cfg,
 	}
+}
+
+func (s *doctorService) UpdateDoctor(models.UpdateDoctorRequest) (models.GetDoctorResponse, error) {
+
+}
+func (s *doctorService) CreateDoctor(models.CreateDoctorRequest) (models.CreateDoctorRequest, error) {
+
+}
+func (s *doctorService) DeleteDoctor(ID int64) error {
+
+}
+func (s *doctorService) GetDoctor(ID int64) error {
+
 }

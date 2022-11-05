@@ -1,6 +1,6 @@
 app:
-  port: 2323
-  host: bruhh
+  port: 8080
+  timeout: 60
 db:
   host: postgres
   port: 5432

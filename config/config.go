@@ -14,8 +14,8 @@ type Configs struct {
 }
 
 type AppConfig struct {
-	Host string
-	Port int
+	TimeOut time.Duration
+	Port    int
 }
 
 type DBConf struct {
@@ -51,7 +51,7 @@ func New() (*Configs, error) {
 
 	//app default values
 	vi.SetDefault("app.port", 8080)
-	vi.SetDefault("app.host", "localhost")
+	vi.SetDefault("app.timeout", 60)
 
 	//redis default values
 	vi.SetDefault("redis.port", 6370)
@@ -76,8 +76,8 @@ func New() (*Configs, error) {
 
 	return &Configs{
 		App: &AppConfig{
-			Host: vi.GetString("app.host"),
-			Port: vi.GetInt("app.port"),
+			TimeOut: time.Second * time.Duration(vi.GetInt("app.timeout")),
+			Port:    vi.GetInt("app.port"),
 		},
 		DB: &DBConf{
 			Host:     dbHost,

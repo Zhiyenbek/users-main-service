@@ -9,11 +9,11 @@ import (
 	"strconv"
 	"syscall"
 
-	"github.com/Zhiyenbek/users-auth-service/config"
-	handler "github.com/Zhiyenbek/users-auth-service/internal/handler/http"
-	"github.com/Zhiyenbek/users-auth-service/internal/repository"
-	"github.com/Zhiyenbek/users-auth-service/internal/repository/connection"
-	"github.com/Zhiyenbek/users-auth-service/internal/service"
+	"github.com/Zhiyenbek/users-main-service/config"
+	handler "github.com/Zhiyenbek/users-main-service/internal/handler/http"
+	"github.com/Zhiyenbek/users-main-service/internal/repository"
+	"github.com/Zhiyenbek/users-main-service/internal/repository/connection"
+	"github.com/Zhiyenbek/users-main-service/internal/service"
 )
 
 func Run() error {

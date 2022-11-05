@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Zhiyenbek/users-auth-service/config"
+	"github.com/Zhiyenbek/users-main-service/config"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 

@@ -1,13 +1,31 @@
 package service
 
 import (
-	"github.com/Zhiyenbek/users-auth-service/config"
-	"github.com/Zhiyenbek/users-auth-service/internal/repository"
+	"github.com/Zhiyenbek/users-main-service/config"
+	"github.com/Zhiyenbek/users-main-service/internal/models"
+	"github.com/Zhiyenbek/users-main-service/internal/repository"
 )
 
+type DoctorService interface {
+	UpdateDoctor(models.UpdateDoctorRequest) (models.GetDoctorResponse, error)
+	CreateDoctor(models.CreateDoctorRequest) (models.CreateDoctorRequest, error)
+	DeleteDoctor(ID int64) error
+	GetDoctor(ID int64) error
+}
+type PatientService interface {
+	UpdatePatient(models.UpdatePatientRequest) (models.GetPatientResponse, error)
+	CreatePatient(models.CreatePatientRequest) (models.CreatePatientRequest, error)
+	DeletePatient(ID int64) error
+	GetPatient(ID int64) error
+}
+
+type AdminService interface {
+	CheckAuth(id int64) error
+}
 type Service struct {
 	PatientService
 	DoctorService
+	AdminService
 }
 
 func New(repos *repository.Repository, cfg *config.Configs) *Service {
