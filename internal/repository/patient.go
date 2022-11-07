@@ -188,7 +188,7 @@ func (r *patientRepository) GetUserIDbyID(ID int64) (int64, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), r.cfg.TimeOut)
 	defer cancel()
 	var userID int64
-	query := `SELECT user_id FROM patient where ID = $1`
+	query := `SELECT user_id FROM patients where ID = $1`
 
 	err := r.db.QueryRow(ctx, query, ID).Scan(&userID)
 	if err != nil {
