@@ -43,13 +43,15 @@ func (r *patientRepository) CreatePatient(patient *models.CreatePatientRequest) 
 		}
 		return nil, fmt.Errorf("error occurred while creating deleting patient in users: %v", err)
 	}
-	err = dRow.Scan(&userID)
-	if err != nil {
-		errTX := tx.Rollback(ctx)
-		if errTX != nil {
-			log.Printf("ERROR: transaction: %s", errTX)
+	if dRow.Next() {
+		err = dRow.Scan(&userID)
+		if err != nil {
+			errTX := tx.Rollback(ctx)
+			if errTX != nil {
+				log.Printf("ERROR: transaction: %s", errTX)
+			}
+			return nil, fmt.Errorf("error occurred while creating deleting patient in users: %v", err)
 		}
-		return nil, fmt.Errorf("error occurred while creating deleting patient in users: %v", err)
 	}
 	dRow.Close()
 	query = `INSERT INTO patients 
@@ -64,13 +66,15 @@ func (r *patientRepository) CreatePatient(patient *models.CreatePatientRequest) 
 		}
 		return nil, fmt.Errorf("error occurred while creating deleting patient in patients: %v", err)
 	}
-	err = dRow.Scan(&ID)
-	if err != nil {
-		errTX := tx.Rollback(ctx)
-		if errTX != nil {
-			log.Printf("ERROR: transaction: %s", errTX)
+	if dRow.Next() {
+		err = dRow.Scan(&ID)
+		if err != nil {
+			errTX := tx.Rollback(ctx)
+			if errTX != nil {
+				log.Printf("ERROR: transaction: %s", errTX)
+			}
+			return nil, fmt.Errorf("error occurred while creating deleting patient in patients: %v", err)
 		}
-		return nil, fmt.Errorf("error occurred while creating deleting patient in patients: %v", err)
 	}
 	dRow.Close()
 	err = tx.Commit(ctx)
@@ -114,6 +118,14 @@ func (r *patientRepository) DeletePatient(ID int64, userID int64) error {
 		}
 		return fmt.Errorf("error occurred while getting deleting patient from patients: %v", err)
 	}
+	err = tx.Commit(ctx)
+	if err != nil {
+		errTX := tx.Rollback(ctx)
+		if errTX != nil {
+			log.Printf("ERROR: transaction error: %s", errTX)
+		}
+		return fmt.Errorf("error occurred while deleting doctor from users: %v", err)
+	}
 	return nil
 }
 func (r *patientRepository) UpdatePatient(patient *models.UpdatePatientRequest, userID int64) error {
@@ -145,6 +157,14 @@ func (r *patientRepository) UpdatePatient(patient *models.UpdatePatientRequest, 
 			log.Printf("ERROR: transaction: %s", errTX)
 		}
 		return fmt.Errorf("error occurred while updating patient INFO in users: %v", err)
+	}
+	err = tx.Commit(ctx)
+	if err != nil {
+		errTX := tx.Rollback(ctx)
+		if errTX != nil {
+			log.Printf("ERROR: transaction error: %s", errTX)
+		}
+		return fmt.Errorf("error occurred while deleting doctor from users: %v", err)
 	}
 	return nil
 }
@@ -192,6 +212,14 @@ func (r *patientRepository) GetPatient(ID int64, UserID int64) (*models.GetPatie
 		return nil, fmt.Errorf("error occurred while getting patient INFO from patients: %v", err)
 	}
 	dRow.Close()
+	err = tx.Commit(ctx)
+	if err != nil {
+		errTX := tx.Rollback(ctx)
+		if errTX != nil {
+			log.Printf("ERROR: transaction error: %s", errTX)
+		}
+		return nil, fmt.Errorf("error occurred while deleting doctor from users: %v", err)
+	}
 	return res, nil
 }
 
