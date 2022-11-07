@@ -18,19 +18,21 @@ type PatientService interface {
 	DeletePatient(ID int64) error
 	GetPatient(ID int64) (*models.GetPatientResponse, error)
 }
-
-type AdminService interface {
-	CheckAuth(id int64) error
+type AuthService interface {
+	Login(creds *models.UserSignInRequest) (*models.Tokens, error)
+	RefreshToken(tokenString string) (*models.Tokens, error)
 }
+
 type Service struct {
 	PatientService
 	DoctorService
-	AdminService
+	AuthService
 }
 
 func New(repos *repository.Repository, cfg *config.Configs) *Service {
 	return &Service{
 		PatientService: NewPatientService(repos, cfg),
 		DoctorService:  NewDoctorService(repos, cfg),
+		AuthService:    NewAuthService(repos, cfg),
 	}
 }

@@ -39,3 +39,8 @@ CREATE TABLE IF NOT EXISTS doctors (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS auth (
+  user_id bigserial,
+  login text not NULL,
+  password text not NULL
+);
