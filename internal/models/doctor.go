@@ -5,7 +5,7 @@ type CreateDoctorRequest struct {
 	LastName     string `json:"last_name" binding:"required"`
 	MiddleName   string `json:"middle_name" `
 	BirthDate    string `json:"birth_date" binding:"required"`
-	IIN          int64  `json:"iin" binding:"required"`
+	IIN          string `json:"iin" binding:"required"`
 	Phone        string `json:"phone" binding:"required"`
 	Address      string `json:"address" binding:"required"`
 	Email        string `json:"email" binding:"required"`
@@ -31,7 +31,7 @@ type UpdateDoctorRequest struct {
 	LastName     string
 	MiddleName   string
 	BirthDate    string
-	IIN          int64
+	IIN          string
 	Phone        string
 	Address      string
 	Email        string
@@ -53,7 +53,7 @@ type GetDoctorResponse struct {
 	LastName     string
 	MiddleName   string
 	BirthDate    string
-	IIN          int64
+	IIN          string
 	Phone        string
 	Address      string
 	Email        string
