@@ -21,7 +21,12 @@ func NewDoctorService(repo *repository.Repository, cfg *config.Configs) DoctorSe
 }
 
 func (s *doctorService) UpdateDoctor(doctorReq *models.UpdateDoctorRequest) error {
-	err := s.doctorRepo.UpdateDoctor(doctorReq, 0)
+	userID, err := s.doctorRepo.GetUserIDbyID(doctorReq.ID)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	err = s.doctorRepo.UpdateDoctor(doctorReq, userID)
 	if err != nil {
 		log.Println(err)
 		return err

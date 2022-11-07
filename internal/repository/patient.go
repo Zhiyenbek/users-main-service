@@ -51,7 +51,7 @@ func (r *patientRepository) CreatePatient(patient *models.CreatePatientRequest) 
 		}
 		return nil, fmt.Errorf("error occurred while creating deleting patient in users: %v", err)
 	}
-
+	dRow.Close()
 	query = `INSERT INTO patients 
 		(blood_type, emergency_contact, martial_status, user_id)
 			VALUES
@@ -72,9 +72,19 @@ func (r *patientRepository) CreatePatient(patient *models.CreatePatientRequest) 
 		}
 		return nil, fmt.Errorf("error occurred while creating deleting patient in patients: %v", err)
 	}
+	dRow.Close()
+	err = tx.Commit(ctx)
+	if err != nil {
+		errTX := tx.Rollback(ctx)
+		if errTX != nil {
+			log.Printf("ERROR: transaction error: %s", errTX)
+		}
+		return nil, fmt.Errorf("error occurred while deleting doctor from users: %v", err)
+	}
 	return &models.CreatePatientResponse{
 		ID: ID,
 	}, nil
+
 }
 func (r *patientRepository) DeletePatient(ID int64, userID int64) error {
 	ctx, cancel := context.WithTimeout(context.Background(), r.cfg.TimeOut)
@@ -163,7 +173,7 @@ func (r *patientRepository) GetPatient(ID int64, UserID int64) (*models.GetPatie
 		}
 		return nil, fmt.Errorf("error occurred while getting patient INFO from users: %v", err)
 	}
-
+	dRow.Close()
 	query = `SELECT (blood_type, emergency_contact, marital_status, user_id) FROM patients WHERE id=$1`
 	dRow, err = tx.Query(ctx, query, ID)
 	if err != nil {
@@ -181,6 +191,7 @@ func (r *patientRepository) GetPatient(ID int64, UserID int64) (*models.GetPatie
 		}
 		return nil, fmt.Errorf("error occurred while getting patient INFO from patients: %v", err)
 	}
+	dRow.Close()
 	return res, nil
 }
 
