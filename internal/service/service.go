@@ -7,7 +7,7 @@ import (
 )
 
 type DoctorService interface {
-	UpdateDoctor(doctorReq *models.UpdateDoctorRequest) (*models.GetDoctorResponse, error)
+	UpdateDoctor(doctorReq *models.UpdateDoctorRequest) error
 	CreateDoctor(doctorReq *models.CreateDoctorRequest) (*models.CreateDoctorResponse, error)
 	DeleteDoctor(ID int64) error
 	GetDoctor(ID int64) error

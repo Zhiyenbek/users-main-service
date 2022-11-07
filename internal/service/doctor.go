@@ -18,7 +18,7 @@ func NewDoctorService(repo *repository.Repository, cfg *config.Configs) DoctorSe
 	}
 }
 
-func (s *doctorService) UpdateDoctor(doctorReq *models.UpdateDoctorRequest) (*models.GetDoctorResponse, error) {
+func (s *doctorService) UpdateDoctor(doctorReq *models.UpdateDoctorRequest) error {
 	return s.doctorRepo.UpdateDoctor(doctorReq, 0)
 }
 func (s *doctorService) CreateDoctor(doctorReq *models.CreateDoctorRequest) (*models.CreateDoctorResponse, error) {
