@@ -71,7 +71,7 @@ type GetDoctorResponse struct {
 
 type GetAllDoctorsResponse struct {
 	ID        int64
-	FirstName string
-	LastName  string
-	IIN       string
+	FirstName string `json:"first_name" binding:"required"`
+	LastName  string `json:"last_name" binding:"required"`
+	IIN       string `json:"iin" binding:"required"`
 }
