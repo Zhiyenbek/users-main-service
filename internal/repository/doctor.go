@@ -32,7 +32,7 @@ func (r *doctorRepository) CreateDoctor(doctor *models.CreateDoctorRequest) (*mo
 		return nil, fmt.Errorf("error occurred while creating doctor in users: %v", err)
 	}
 	query := `INSERT INTO users 
-				(first_name, last_name, middle_name, birthdata, iin, phone, address, email)
+				(first_name, last_name, middle_name, birthdate, iin, phone, address, email)
 			VALUES
 				($1, $2, $3, $4, $5, $6, $7, $8) RETURNING ID;`
 	dRow, err := tx.Query(ctx, query, doctor.FirstName, doctor.LastName, doctor.MiddleName, doctor.BirthDate, doctor.IIN, doctor.Phone, doctor.Address, doctor.Email)
@@ -55,7 +55,7 @@ func (r *doctorRepository) CreateDoctor(doctor *models.CreateDoctorRequest) (*mo
 	query = `INSERT INTO doctors 
 		(department_id, spec_id, experience, photo, category, price, schedule, degree, rating, website_url, user_id)
 			VALUES
-		($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $10);`
+		($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);`
 	dRow, err = tx.Query(ctx, query, doctor.DepartmentId, doctor.SpecId, doctor.Experience, doctor.Photo, doctor.Category, doctor.Price, doctor.Schedule, doctor.Degree, doctor.Rating, doctor.WebsiteUrl, userID)
 	if err != nil {
 		errTX := tx.Rollback(ctx)
@@ -86,24 +86,24 @@ func (r *doctorRepository) DeleteDoctor(ID int64, userID int64) error {
 		return err
 	}
 
-	query := `DELETE FROM patients WHERE id=$1`
+	query := `DELETE FROM doctors WHERE id=$1`
 	_, err = tx.Exec(ctx, query, ID)
 	if err != nil {
 		errTX := tx.Rollback(ctx)
 		if errTX != nil {
 			log.Printf("ERROR: transaction error: %s", errTX)
 		}
-		return fmt.Errorf("error occurred while deleting doctor from users: %v", err)
+		return fmt.Errorf("error occurred while deleting doctor from doctors: %v", err)
 	}
 
-	query = `DELETE FROM doctors WHERE id=$1`
+	query = `DELETE FROM users WHERE id=$1`
 	_, err = tx.Exec(ctx, query, userID)
 	if err != nil {
 		errTX := tx.Rollback(ctx)
 		if errTX != nil {
 			log.Printf("ERROR: transaction error: %s", errTX)
 		}
-		return fmt.Errorf("error occurred while deleting doctor from doctors: %v", err)
+		return fmt.Errorf("error occurred while deleting doctor from users: %v", err)
 	}
 	return nil
 }
@@ -116,7 +116,7 @@ func (r *doctorRepository) UpdateDoctor(doctor *models.UpdateDoctorRequest, user
 		return err
 	}
 	query := `UPDATE users 
-				SET first_name = $1, last_name = $2, middle_name = $3, birthdata = $4, iin = $5, phone = $6, address = $7, email = $8)
+				SET first_name = $1, last_name = $2, middle_name = $3, birthdate = $4, iin = $5, phone = $6, address = $7, email = $8
 			  WHERE id = $9`
 	_, err = tx.Exec(ctx, query, doctor.FirstName, doctor.LastName, doctor.MiddleName, doctor.BirthDate, doctor.IIN, doctor.Phone, doctor.Address, doctor.Email, userID)
 	if err != nil {
@@ -128,7 +128,7 @@ func (r *doctorRepository) UpdateDoctor(doctor *models.UpdateDoctorRequest, user
 	}
 
 	query = `UPDATE doctors 
-				SET deparment_id = $1, spec_id = $2, experience = $3, photo = $4, category = $5, price = $6, schedule = $7, degree = $8, rating = $9, website_url = $10, user_id = $11)
+				SET department_id = $1, spec_id = $2, experience = $3, photo = $4, category = $5, price = $6, schedule = $7, degree = $8, rating = $9, website_url = $10, user_id = $11
 			  WHERE id = $12`
 	_, err = tx.Query(ctx, query, doctor.DepartmentId, doctor.SpecId, doctor.Experience, doctor.Photo, doctor.Category, doctor.Price, doctor.Schedule, doctor.Degree, doctor.Rating, doctor.WebsiteUrl, doctor.ID, userID)
 	if err != nil {
@@ -149,7 +149,7 @@ func (r *doctorRepository) GetDoctor(ID int64, UserID int64) (*models.GetDoctorR
 	if err != nil {
 		return nil, err
 	}
-	query := `SELECT (first_name, last_name, middle_name, birthdata, iin, phone, address, email) FROM users WHERE id=$1`
+	query := `SELECT (first_name, last_name, middle_name, birthdate, iin, phone, address, email) FROM users WHERE id=$1`
 	dRow, err := tx.Query(ctx, query, ID)
 	if err != nil {
 		errTX := tx.Rollback(ctx)
@@ -167,7 +167,7 @@ func (r *doctorRepository) GetDoctor(ID int64, UserID int64) (*models.GetDoctorR
 		return nil, fmt.Errorf("error occurred while getting patient INFO from users: %v", err)
 	}
 
-	query = `SELECT (deparment_id, spec_id, experience, photo, category, price, schedule, degree, rating, website_url, user_id) FROM doctors WHERE id=$1`
+	query = `SELECT (department_id, spec_id, experience, photo, category, price, schedule, degree, rating, website_url, user_id) FROM doctors WHERE id=$1`
 	dRow, err = tx.Query(ctx, query, ID)
 	if err != nil {
 		errTX := tx.Rollback(ctx)
@@ -191,7 +191,7 @@ func (r *doctorRepository) GetAllDoctors() ([]*models.GetAllDoctorsResponse, err
 	defer cancel()
 	var userID int64
 	var first_name, last_name string
-	query := `SELECT id, first_name, last_name FROM users`
+	query := `SELECT users.id, first_name, last_name FROM users JOIN doctors ON user_id=users.id`
 
 	rows, err := r.db.Query(ctx, query)
 	if err != nil {
@@ -202,11 +202,13 @@ func (r *doctorRepository) GetAllDoctors() ([]*models.GetAllDoctorsResponse, err
 	}
 	defer rows.Close()
 	result := make([]*models.GetAllDoctorsResponse, 0, 100)
+
 	for rows.Next() {
 		err := rows.Scan(&userID, &first_name, &last_name)
 		if err != nil {
 			return nil, fmt.Errorf("%w error occurred while scanning row from users: %v", models.ErrPatientNotFound, err)
 		}
+
 		result = append(result, &models.GetAllDoctorsResponse{
 			ID:        userID,
 			FirstName: first_name,
