@@ -78,6 +78,7 @@ func (h *handler) DeletePatient(c *gin.Context) {
 			return
 		}
 	}
+	c.JSON(200, sendResponse(0, nil, nil))
 }
 func (h *handler) GetPatient(c *gin.Context) {
 	idParam := c.Param("patient_id")
