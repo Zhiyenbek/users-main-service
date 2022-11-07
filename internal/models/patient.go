@@ -3,9 +3,9 @@ package models
 // import "encoding/json"
 
 type CreatePatientRequest struct {
-	BloodType        int32
-	EmergencyContact string
-	MaritalStatus    string
+	BloodType        int32  `json:"blood_type" binding:"required"`
+	EmergencyContact string `json:"emer_contact" binding:"required"`
+	MaritalStatus    string `json:"marit_st" binding:"required"`
 	FirstName        string `json:"first_name" binding:"required"`
 	LastName         string `json:"last_name" binding:"required"`
 	MiddleName       string `json:"middle_name" `
