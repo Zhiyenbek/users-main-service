@@ -4,6 +4,7 @@ import (
 	"github.com/Zhiyenbek/users-main-service/config"
 	"github.com/Zhiyenbek/users-main-service/internal/service"
 	"github.com/gin-gonic/gin"
+	cors "github.com/rs/cors/wrapper/gin"
 )
 
 type handler struct {
@@ -24,6 +25,7 @@ func New(services *service.Service, cfg *config.Configs) Handler {
 
 func (h *handler) InitRoutes() *gin.Engine {
 	router := gin.Default()
+	router.Use(cors.Default())
 	router.POST("/sign-in", h.SignIn)
 	router.POST("/refresh-token", h.RefreshToken)
 
