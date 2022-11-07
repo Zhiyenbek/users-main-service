@@ -18,6 +18,7 @@ type DoctorRepository interface {
 	DeleteDoctor(ID int64, userID int64) error
 	UpdateDoctor(doctor *models.UpdateDoctorRequest, userID int64) error
 	GetDoctor(ID int64, UserID int64) (*models.GetDoctorResponse, error)
+	GetUserIDbyID(ID int64) (int64, error)
 }
 
 type PatientRepository interface {

@@ -29,6 +29,7 @@ func (s *doctorService) UpdateDoctor(doctorReq *models.UpdateDoctorRequest) erro
 	return nil
 }
 func (s *doctorService) CreateDoctor(doctorReq *models.CreateDoctorRequest) (*models.CreateDoctorResponse, error) {
+
 	res, err := s.doctorRepo.CreateDoctor(doctorReq)
 	if err != nil {
 		log.Println(err)
@@ -37,7 +38,12 @@ func (s *doctorService) CreateDoctor(doctorReq *models.CreateDoctorRequest) (*mo
 	return res, nil
 }
 func (s *doctorService) DeleteDoctor(ID int64) error {
-	err := s.doctorRepo.DeleteDoctor(ID, 0)
+	userID, err := s.doctorRepo.GetUserIDbyID(ID)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	err = s.doctorRepo.DeleteDoctor(ID, userID)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -45,7 +51,12 @@ func (s *doctorService) DeleteDoctor(ID int64) error {
 	return nil
 }
 func (s *doctorService) GetDoctor(ID int64) (*models.GetDoctorResponse, error) {
-	res, err := s.doctorRepo.GetDoctor(ID, 0)
+	userID, err := s.doctorRepo.GetUserIDbyID(ID)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	res, err := s.doctorRepo.GetDoctor(ID, userID)
 	if err != nil {
 		log.Println(err)
 		return nil, err

@@ -217,3 +217,18 @@ func (r *doctorRepository) GetAllDoctors() ([]*models.GetAllDoctorsResponse, err
 	}
 	return result, nil
 }
+func (r *doctorRepository) GetUserIDbyID(ID int64) (int64, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), r.cfg.TimeOut)
+	defer cancel()
+	var userID int64
+	query := `SELECT user_id FROM doctors where ID = $1`
+
+	err := r.db.QueryRow(ctx, query, ID).Scan(&userID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return -1, fmt.Errorf("%w error occurred while getting userID from doctors: %v", models.ErrPatientNotFound, err)
+		}
+		return -1, fmt.Errorf("error occurred while getting userID from doctors: %v", err)
+	}
+	return userID, nil
+}
