@@ -3,11 +3,11 @@ CREATE TABLE IF NOT EXISTS users (
   first_name text NOT NULL ,
   last_name text NOT NULL ,
   middle_name text, 
-  birthdate date not NULL,
+  birthdate text not NULL,
   iin bigint not NULL, 
   phone text not NULL, 
   address text not NULL, 
-  email text UNIQUE NOT NULL ,
+  email text UNIQUE ,
   
   _created_at timestamp DEFAULT now() NOT NULL ,
   _modified_at timestamp DEFAULT now() NOT NULL ,
