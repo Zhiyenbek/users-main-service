@@ -1,6 +1,8 @@
 package service
 
 import (
+	"log"
+
 	"github.com/Zhiyenbek/users-main-service/config"
 	"github.com/Zhiyenbek/users-main-service/internal/models"
 	"github.com/Zhiyenbek/users-main-service/internal/repository"
@@ -17,15 +19,35 @@ func NewPatientService(repo *repository.Repository, cfg *config.Configs) Patient
 		cfg:         cfg,
 	}
 }
-func (s *patientService) UpdatePatient(patientReq *models.UpdatePatientRequest) (*models.GetPatientResponse, error) {
-	return s.UpdatePatient(patientReq)
+func (s *patientService) UpdatePatient(patientReq *models.UpdatePatientRequest) error {
+	userID, err := s.PatientRepo.GetUserIDbyID(patientReq.ID)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	err = s.PatientRepo.UpdatePatient(patientReq, userID)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
 }
-func (s *patientService) CreatePatient(patientReq *models.CreatePatientRequest) (*models.CreatePatientRequest, error) {
-	return s.CreatePatient(patientReq)
+func (s *patientService) CreatePatient(patientReq *models.CreatePatientRequest) (*models.CreatePatientResponse, error) {
+	return s.PatientRepo.CreatePatient(patientReq)
 }
 func (s *patientService) DeletePatient(ID int64) error {
-	return s.DeletePatient(ID)
+	userID, err := s.PatientRepo.GetUserIDbyID(ID)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return s.PatientRepo.DeletePatient(ID, userID)
 }
-func (s *patientService) GetPatient(ID int64) error {
-	return s.GetPatient(ID)
+func (s *patientService) GetPatient(ID int64) (*models.GetPatientResponse, error) {
+	userID, err := s.PatientRepo.GetUserIDbyID(ID)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return s.PatientRepo.GetPatient(ID, userID)
 }

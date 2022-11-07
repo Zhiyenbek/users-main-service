@@ -38,12 +38,13 @@ func (h *handler) UpdateDoctor(c *gin.Context) {
 		c.AbortWithStatusJSON(400, sendResponse(-1, nil, models.ErrInvalidInput))
 		return
 	}
-	id := c.Param("doctor_id")
-	if id == "" {
+	idParam := c.Param("doctor_id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil || id < 1 {
 		log.Printf("ERROR: invalid input, missing user id: \n")
 		c.AbortWithStatusJSON(400, sendResponse(-1, nil, models.ErrInvalidInput))
 	}
-	req.ID = id
+	req.ID = int64(id)
 	resp, err := h.service.DoctorService.UpdateDoctor(req)
 	if err != nil {
 		switch {

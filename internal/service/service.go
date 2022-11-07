@@ -8,15 +8,15 @@ import (
 
 type DoctorService interface {
 	UpdateDoctor(doctorReq *models.UpdateDoctorRequest) (*models.GetDoctorResponse, error)
-	CreateDoctor(doctorReq *models.CreateDoctorRequest) (*models.CreateDoctorRequest, error)
+	CreateDoctor(doctorReq *models.CreateDoctorRequest) (*models.CreateDoctorResponse, error)
 	DeleteDoctor(ID int64) error
 	GetDoctor(ID int64) error
 }
 type PatientService interface {
-	UpdatePatient(pateintReq *models.UpdatePatientRequest) (*models.GetPatientResponse, error)
-	CreatePatient(pateintReq *models.CreatePatientRequest) (*models.CreatePatientRequest, error)
+	UpdatePatient(patientReq *models.UpdatePatientRequest) error
+	CreatePatient(pateintReq *models.CreatePatientRequest) (*models.CreatePatientResponse, error)
 	DeletePatient(ID int64) error
-	GetPatient(ID int64) error
+	GetPatient(ID int64) (*models.GetPatientResponse, error)
 }
 
 type AdminService interface {

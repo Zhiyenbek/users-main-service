@@ -44,8 +44,8 @@ func (h *handler) UpdatePatient(c *gin.Context) {
 		c.AbortWithStatusJSON(400, sendResponse(-1, nil, models.ErrInvalidInput))
 		return
 	}
-	req.ID = id
-	resp, err := h.service.PatientService.UpdatePatient(req)
+	req.ID = int64(id)
+	err = h.service.PatientService.UpdatePatient(req)
 	if err != nil {
 		switch {
 		case errors.Is(err, models.ErrPatientNotFound):
@@ -56,7 +56,7 @@ func (h *handler) UpdatePatient(c *gin.Context) {
 			return
 		}
 	}
-	c.JSON(200, sendResponse(0, resp, nil))
+	c.JSON(200, sendResponse(0, req, nil))
 }
 
 func (h *handler) GetPatient(c *gin.Context) {
