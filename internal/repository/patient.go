@@ -132,13 +132,13 @@ func (r *patientRepository) UpdatePatient(patient *models.UpdatePatientRequest, 
 		if errTX != nil {
 			log.Printf("ERROR: transaction: %s", errTX)
 		}
-		return fmt.Errorf("error occurred while getting patient INFO in patients: %v", err)
+		return fmt.Errorf("error occurred while updating patient info: %v", err)
 	}
 
 	query = `UPDATE patients 
 				SET blood_type = $1, emergency_contact = $2, marital_status = $3
 			  WHERE id = $4`
-	_, err = tx.Query(ctx, query, patient.BloodType, patient.EmergencyContact, patient.MaritalStatus, userID)
+	_, err = tx.Query(ctx, query, patient.BloodType, patient.EmergencyContact, patient.MaritalStatus, patient.ID)
 	if err != nil {
 		errTX := tx.Rollback(ctx)
 		if errTX != nil {
@@ -156,7 +156,7 @@ func (r *patientRepository) GetPatient(ID int64, UserID int64) (*models.GetPatie
 	if err != nil {
 		return nil, err
 	}
-	query := `SELECT (first_name, last_name, middle_name, birthdate, iin, phone, address, email) FROM users WHERE id=$1`
+	query := `SELECT first_name, last_name, middle_name, birthdate, iin, phone, address, email FROM users WHERE id=$1`
 	dRow, err := tx.Query(ctx, query, ID)
 	if err != nil {
 		errTX := tx.Rollback(ctx)
