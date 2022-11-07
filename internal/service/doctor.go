@@ -68,3 +68,12 @@ func (s *doctorService) GetDoctor(ID int64) (*models.GetDoctorResponse, error) {
 	}
 	return res, nil
 }
+
+func (s *doctorService) GetAllDoctors() ([]*models.GetAllDoctorsResponse, error) {
+	res, err := s.doctorRepo.GetAllDoctors()
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return res, nil
+}

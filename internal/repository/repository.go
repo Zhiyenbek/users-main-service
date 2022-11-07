@@ -19,6 +19,7 @@ type DoctorRepository interface {
 	UpdateDoctor(doctor *models.UpdateDoctorRequest, userID int64) error
 	GetDoctor(ID int64, UserID int64) (*models.GetDoctorResponse, error)
 	GetUserIDbyID(ID int64) (int64, error)
+	GetAllDoctors() ([]*models.GetAllDoctorsResponse, error)
 }
 
 type PatientRepository interface {
@@ -27,6 +28,7 @@ type PatientRepository interface {
 	UpdatePatient(patient *models.UpdatePatientRequest, userID int64) error
 	GetPatient(ID int64, UserID int64) (*models.GetPatientResponse, error)
 	GetUserIDbyID(ID int64) (int64, error)
+	GetAllPatients() ([]*models.GetAllPatientsResponse, error)
 }
 
 type AuthRepository interface {

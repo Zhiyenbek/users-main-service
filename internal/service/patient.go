@@ -66,3 +66,11 @@ func (s *patientService) GetPatient(ID int64) (*models.GetPatientResponse, error
 	}
 	return res, nil
 }
+func (s *patientService) GetAllPatients() ([]*models.GetAllPatientsResponse, error) {
+	res, err := s.PatientRepo.GetAllPatients()
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return res, nil
+}

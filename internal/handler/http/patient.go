@@ -101,3 +101,18 @@ func (h *handler) GetPatient(c *gin.Context) {
 	}
 	c.JSON(200, sendResponse(0, res, nil))
 }
+
+func (h *handler) GetAllPatients(c *gin.Context) {
+	res, err := h.service.PatientService.GetAllPatients()
+	if err != nil {
+		switch {
+		case errors.Is(err, models.ErrPatientNotFound):
+			c.AbortWithStatusJSON(404, sendResponse(-1, nil, models.ErrInvalidInput))
+			return
+		default:
+			c.AbortWithStatusJSON(500, sendResponse(-1, nil, models.ErrInternalServer))
+			return
+		}
+	}
+	c.JSON(200, sendResponse(0, res, nil))
+}
