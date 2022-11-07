@@ -10,7 +10,7 @@ type CreatePatientRequest struct {
 	LastName         string
 	MiddleName       string
 	BirthDate        string
-	IIN              int64
+	IIN              string
 	Phone            string
 	Address          string
 	Email            string
@@ -29,7 +29,7 @@ type UpdatePatientRequest struct {
 	LastName         string
 	MiddleName       string
 	BirthDate        string
-	IIN              int64
+	IIN              string
 	Phone            string
 	Address          string
 	Email            string
@@ -44,8 +44,15 @@ type GetPatientResponse struct {
 	LastName         string
 	MiddleName       string
 	BirthDate        string
-	IIN              int64
+	IIN              string
 	Phone            string
 	Address          string
 	Email            string
+}
+
+type GetAllPatientsResponse struct {
+	ID        int64
+	FirstName string
+	LastName  string
+	IIN       string
 }

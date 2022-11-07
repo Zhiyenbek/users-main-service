@@ -199,3 +199,33 @@ func (r *patientRepository) GetUserIDbyID(ID int64) (int64, error) {
 	}
 	return userID, nil
 }
+
+func (r *patientRepository) GetAllPatients() ([]*models.GetAllPatientsResponse, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), r.cfg.TimeOut)
+	defer cancel()
+	var userID int64
+	var first_name, last_name string
+	query := `SELECT id, first_name, last_name FROM users`
+
+	rows, err := r.db.Query(ctx, query)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, fmt.Errorf("%w error occurred while getting rows from users: %v", models.ErrPatientNotFound, err)
+		}
+		return nil, fmt.Errorf("error occurred while getting rows from users: %v", err)
+	}
+	defer rows.Close()
+	result := make([]*models.GetAllPatientsResponse, 0, 100)
+	for rows.Next() {
+		err := rows.Scan(&userID, &first_name, &last_name)
+		if err != nil {
+			return nil, fmt.Errorf("%w error occurred while scanning row from users: %v", models.ErrPatientNotFound, err)
+		}
+		result = append(result, &models.GetAllPatientsResponse{
+			ID:        userID,
+			FirstName: first_name,
+			LastName:  last_name,
+		})
+	}
+	return result, nil
+}
