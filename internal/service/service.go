@@ -10,7 +10,7 @@ type DoctorService interface {
 	UpdateDoctor(doctorReq *models.UpdateDoctorRequest) error
 	CreateDoctor(doctorReq *models.CreateDoctorRequest) (*models.CreateDoctorResponse, error)
 	DeleteDoctor(ID int64) error
-	GetDoctor(ID int64) error
+	GetDoctor(ID int64) (*models.GetDoctorResponse, error)
 }
 type PatientService interface {
 	UpdatePatient(patientReq *models.UpdatePatientRequest) error
