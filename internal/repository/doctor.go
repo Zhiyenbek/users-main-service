@@ -180,7 +180,7 @@ func (r *doctorRepository) GetDoctor(ID int64, UserID int64) (*models.GetDoctorR
 		return nil, err
 	}
 	query := `SELECT first_name, last_name, middle_name, birthdate, iin, phone, address, email FROM users WHERE id=$1`
-	dRow, err := tx.Query(ctx, query, ID)
+	dRow, err := tx.Query(ctx, query, UserID)
 	if err != nil {
 		errTX := tx.Rollback(ctx)
 		if errTX != nil {
@@ -200,8 +200,8 @@ func (r *doctorRepository) GetDoctor(ID int64, UserID int64) (*models.GetDoctorR
 		}
 	}
 	dRow.Close()
-	query = `SELECT department_id, spec_id, experience, photo, category, price, schedule, degree, rating, website_url, user_id FROM doctors WHERE id=$1`
-	dRow, err = tx.Query(ctx, query, UserID)
+	query = `SELECT department_id, spec_id, experience, photo, category, price, schedule, degree, rating, website_url FROM doctors WHERE id=$1`
+	dRow, err = tx.Query(ctx, query, ID)
 	if err != nil {
 		errTX := tx.Rollback(ctx)
 		if errTX != nil {
@@ -210,7 +210,7 @@ func (r *doctorRepository) GetDoctor(ID int64, UserID int64) (*models.GetDoctorR
 		return nil, fmt.Errorf("error occurred while getting doctor INFO from doctors: %v", err)
 	}
 	if dRow.Next() {
-		err = dRow.Scan(&res.DepartmentId, &res.SpecId, &res.Experience, &res.Photo, &res.Category, &res.Price, &res.Schedule, &res.Degree, &res.Rating, &res.WebsiteUrl, &res.ID)
+		err = dRow.Scan(&res.DepartmentId, &res.SpecId, &res.Experience, &res.Photo, &res.Category, &res.Price, &res.Schedule, &res.Degree, &res.Rating, &res.WebsiteUrl)
 		if err != nil {
 			errTX := tx.Rollback(ctx)
 			if errTX != nil {
@@ -219,7 +219,7 @@ func (r *doctorRepository) GetDoctor(ID int64, UserID int64) (*models.GetDoctorR
 			return nil, fmt.Errorf("error occurred while getting doctor INFO from doctors: %v", err)
 		}
 	}
-
+	res.ID = ID
 	dRow.Close()
 	err = tx.Commit(ctx)
 	if err != nil {

@@ -33,7 +33,12 @@ func (s *patientService) UpdatePatient(patientReq *models.UpdatePatientRequest) 
 	return nil
 }
 func (s *patientService) CreatePatient(patientReq *models.CreatePatientRequest) (*models.CreatePatientResponse, error) {
-	return s.PatientRepo.CreatePatient(patientReq)
+	res, err := s.PatientRepo.CreatePatient(patientReq)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return res, nil
 }
 func (s *patientService) DeletePatient(ID int64) error {
 	userID, err := s.PatientRepo.GetUserIDbyID(ID)
@@ -41,7 +46,12 @@ func (s *patientService) DeletePatient(ID int64) error {
 		log.Println(err)
 		return err
 	}
-	return s.PatientRepo.DeletePatient(ID, userID)
+	err = s.PatientRepo.DeletePatient(ID, userID)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
 }
 func (s *patientService) GetPatient(ID int64) (*models.GetPatientResponse, error) {
 	userID, err := s.PatientRepo.GetUserIDbyID(ID)
@@ -49,5 +59,10 @@ func (s *patientService) GetPatient(ID int64) (*models.GetPatientResponse, error
 		log.Println(err)
 		return nil, err
 	}
-	return s.PatientRepo.GetPatient(ID, userID)
+	res, err := s.PatientRepo.GetPatient(ID, userID)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return res, nil
 }
