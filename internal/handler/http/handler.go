@@ -37,6 +37,7 @@ func (h *handler) InitRoutes() *gin.Engine {
 	doctor.POST("/sign-up", h.RegisterDoctor)
 	doctor.PUT("/:doctor_id", h.UpdateDoctor)
 	doctor.GET("/:doctor_id", h.GetDoctor)
+	doctor.DELETE("/:doctor_id", h.DeleteDoctor)
 
 	return router
 }

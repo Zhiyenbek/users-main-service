@@ -28,7 +28,7 @@ func (h *handler) RegisterPatient(c *gin.Context) {
 			return
 		}
 	}
-	c.JSON(200, sendResponse(0, resp, nil))
+	c.JSON(201, sendResponse(0, resp, nil))
 }
 
 func (h *handler) UpdatePatient(c *gin.Context) {
@@ -59,7 +59,7 @@ func (h *handler) UpdatePatient(c *gin.Context) {
 	c.JSON(200, sendResponse(0, req, nil))
 }
 
-func (h *handler) GetPatient(c *gin.Context) {
+func (h *handler) DeletePatient(c *gin.Context) {
 	idParam := c.Param("patient_id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil || id < 1 {
@@ -78,4 +78,25 @@ func (h *handler) GetPatient(c *gin.Context) {
 			return
 		}
 	}
+}
+func (h *handler) GetPatient(c *gin.Context) {
+	idParam := c.Param("patient_id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil || id < 1 {
+		log.Printf("ERROR: invalid input, missing user id: \n")
+		c.AbortWithStatusJSON(400, sendResponse(-1, nil, models.ErrInvalidInput))
+	}
+
+	res, err := h.service.PatientService.GetPatient(int64(id))
+	if err != nil {
+		switch {
+		case errors.Is(err, models.ErrPatientNotFound):
+			c.AbortWithStatusJSON(404, sendResponse(-1, nil, models.ErrInvalidInput))
+			return
+		default:
+			c.AbortWithStatusJSON(500, sendResponse(-1, nil, models.ErrInternalServer))
+			return
+		}
+	}
+	c.JSON(200, sendResponse(0, res, nil))
 }

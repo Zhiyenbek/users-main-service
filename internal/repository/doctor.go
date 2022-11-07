@@ -41,36 +41,50 @@ func (r *doctorRepository) CreateDoctor(doctor *models.CreateDoctorRequest) (*mo
 		if errTX != nil {
 			log.Printf("ERROR: transaction: %s", errTX)
 		}
-		return nil, fmt.Errorf("error occurred while creating deleting patient in users: %v", err)
+		return nil, fmt.Errorf("error occurred while creating doctor in users: %v", err)
 	}
-	err = dRow.Scan(&userID)
-	if err != nil {
-		errTX := tx.Rollback(ctx)
-		if errTX != nil {
-			log.Printf("ERROR: transaction: %s", errTX)
+	if dRow.Next() {
+		err = dRow.Scan(&userID)
+		if err != nil {
+			errTX := tx.Rollback(ctx)
+			if errTX != nil {
+				log.Printf("ERROR: transaction: %s", errTX)
+			}
+			log.Println("ROOM TOOR")
+			return nil, fmt.Errorf("error occurred while scanning doctor in users: %v", err)
 		}
-		return nil, fmt.Errorf("error occurred while creating deleting patient in users: %v", err)
 	}
-
+	dRow.Close()
 	query = `INSERT INTO doctors 
 		(department_id, spec_id, experience, photo, category, price, schedule, degree, rating, website_url, user_id)
 			VALUES
-		($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);`
+		($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id;`
 	dRow, err = tx.Query(ctx, query, doctor.DepartmentId, doctor.SpecId, doctor.Experience, doctor.Photo, doctor.Category, doctor.Price, doctor.Schedule, doctor.Degree, doctor.Rating, doctor.WebsiteUrl, userID)
 	if err != nil {
 		errTX := tx.Rollback(ctx)
 		if errTX != nil {
 			log.Printf("ERROR: transaction: %s", errTX)
 		}
-		return nil, fmt.Errorf("error occurred while creating deleting patient in patients: %v", err)
+		return nil, fmt.Errorf("error occurred while creaing doctors in doctors: %v", err)
 	}
-	err = dRow.Scan(&ID)
+	if dRow.Next() {
+		err = dRow.Scan(&ID)
+		if err != nil {
+			errTX := tx.Rollback(ctx)
+			if errTX != nil {
+				log.Printf("ERROR: transaction: %s", errTX)
+			}
+			return nil, fmt.Errorf("error occurred while creating doctors in doctors: %v", err)
+		}
+	}
+	dRow.Close()
+	err = tx.Commit(ctx)
 	if err != nil {
 		errTX := tx.Rollback(ctx)
 		if errTX != nil {
-			log.Printf("ERROR: transaction: %s", errTX)
+			log.Printf("ERROR: transaction error: %s", errTX)
 		}
-		return nil, fmt.Errorf("error occurred while creating deleting patient in patients: %v", err)
+		return nil, fmt.Errorf("error occurred while creating doctor: %v", err)
 	}
 	return &models.CreateDoctorResponse{
 		ID: ID,
@@ -105,6 +119,14 @@ func (r *doctorRepository) DeleteDoctor(ID int64, userID int64) error {
 		}
 		return fmt.Errorf("error occurred while deleting doctor from users: %v", err)
 	}
+	err = tx.Commit(ctx)
+	if err != nil {
+		errTX := tx.Rollback(ctx)
+		if errTX != nil {
+			log.Printf("ERROR: transaction error: %s", errTX)
+		}
+		return fmt.Errorf("error occurred while deleting doctor from users: %v", err)
+	}
 	return nil
 }
 
@@ -128,15 +150,23 @@ func (r *doctorRepository) UpdateDoctor(doctor *models.UpdateDoctorRequest, user
 	}
 
 	query = `UPDATE doctors 
-				SET department_id = $1, spec_id = $2, experience = $3, photo = $4, category = $5, price = $6, schedule = $7, degree = $8, rating = $9, website_url = $10, user_id = $11
-			  WHERE id = $12`
-	_, err = tx.Query(ctx, query, doctor.DepartmentId, doctor.SpecId, doctor.Experience, doctor.Photo, doctor.Category, doctor.Price, doctor.Schedule, doctor.Degree, doctor.Rating, doctor.WebsiteUrl, doctor.ID, userID)
+				SET department_id = $1, spec_id = $2, experience = $3, photo = $4, category = $5, price = $6, schedule = $7, degree = $8, rating = $9, website_url = $10
+			  WHERE id = $11`
+	_, err = tx.Exec(ctx, query, doctor.DepartmentId, doctor.SpecId, doctor.Experience, doctor.Photo, doctor.Category, doctor.Price, doctor.Schedule, doctor.Degree, doctor.Rating, doctor.WebsiteUrl, doctor.ID)
 	if err != nil {
 		errTX := tx.Rollback(ctx)
 		if errTX != nil {
 			log.Printf("ERROR: transaction: %s", errTX)
 		}
 		return fmt.Errorf("error occurred while updating doctor INFO in doctors: %v", err)
+	}
+	err = tx.Commit(ctx)
+	if err != nil {
+		errTX := tx.Rollback(ctx)
+		if errTX != nil {
+			log.Printf("ERROR: transaction error: %s", errTX)
+		}
+		return fmt.Errorf("error occurred while deleting doctor from users: %v", err)
 	}
 	return nil
 }
@@ -149,7 +179,7 @@ func (r *doctorRepository) GetDoctor(ID int64, UserID int64) (*models.GetDoctorR
 	if err != nil {
 		return nil, err
 	}
-	query := `SELECT (first_name, last_name, middle_name, birthdate, iin, phone, address, email) FROM users WHERE id=$1`
+	query := `SELECT first_name, last_name, middle_name, birthdate, iin, phone, address, email FROM users WHERE id=$1`
 	dRow, err := tx.Query(ctx, query, ID)
 	if err != nil {
 		errTX := tx.Rollback(ctx)
@@ -158,31 +188,46 @@ func (r *doctorRepository) GetDoctor(ID int64, UserID int64) (*models.GetDoctorR
 		}
 		return nil, err
 	}
-	err = dRow.Scan(res.FirstName, res.LastName, res.MiddleName, res.BirthDate, res.IIN, res.Phone, res.Address, res.Email)
-	if err != nil {
-		errTX := tx.Rollback(ctx)
-		if errTX != nil {
-			log.Printf("ERROR: transaction: %s", errTX)
-		}
-		return nil, fmt.Errorf("error occurred while getting patient INFO from users: %v", err)
-	}
 
-	query = `SELECT (department_id, spec_id, experience, photo, category, price, schedule, degree, rating, website_url, user_id) FROM doctors WHERE id=$1`
-	dRow, err = tx.Query(ctx, query, ID)
-	if err != nil {
-		errTX := tx.Rollback(ctx)
-		if errTX != nil {
-			log.Printf("ERROR: transaction: %s", errTX)
+	if dRow.Next() {
+		err = dRow.Scan(&res.FirstName, &res.LastName, &res.MiddleName, &res.BirthDate, &res.IIN, &res.Phone, &res.Address, &res.Email)
+		if err != nil {
+			errTX := tx.Rollback(ctx)
+			if errTX != nil {
+				log.Printf("ERROR: transaction: %s", errTX)
+			}
+			return nil, fmt.Errorf("error occurred while getting patient INFO from users: %v", err)
 		}
-		return nil, err
 	}
-	err = dRow.Scan(&res.DepartmentId, &res.SpecId, &res.Experience, &res.Photo, &res.Category, &res.Price, &res.Schedule, &res.Degree, &res.Rating, &res.WebsiteUrl, &res.ID)
+	dRow.Close()
+	query = `SELECT department_id, spec_id, experience, photo, category, price, schedule, degree, rating, website_url, user_id FROM doctors WHERE id=$1`
+	dRow, err = tx.Query(ctx, query, UserID)
 	if err != nil {
 		errTX := tx.Rollback(ctx)
 		if errTX != nil {
 			log.Printf("ERROR: transaction: %s", errTX)
 		}
 		return nil, fmt.Errorf("error occurred while getting doctor INFO from doctors: %v", err)
+	}
+	if dRow.Next() {
+		err = dRow.Scan(&res.DepartmentId, &res.SpecId, &res.Experience, &res.Photo, &res.Category, &res.Price, &res.Schedule, &res.Degree, &res.Rating, &res.WebsiteUrl, &res.ID)
+		if err != nil {
+			errTX := tx.Rollback(ctx)
+			if errTX != nil {
+				log.Printf("ERROR: transaction: %s", errTX)
+			}
+			return nil, fmt.Errorf("error occurred while getting doctor INFO from doctors: %v", err)
+		}
+	}
+
+	dRow.Close()
+	err = tx.Commit(ctx)
+	if err != nil {
+		errTX := tx.Rollback(ctx)
+		if errTX != nil {
+			log.Printf("ERROR: transaction error: %s", errTX)
+		}
+		return nil, fmt.Errorf("error occurred while deleting doctor from users: %v", err)
 	}
 	return res, nil
 }
@@ -221,7 +266,7 @@ func (r *doctorRepository) GetUserIDbyID(ID int64) (int64, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), r.cfg.TimeOut)
 	defer cancel()
 	var userID int64
-	query := `SELECT user_id FROM doctors where ID = $1`
+	query := `SELECT user_id FROM doctors where id = $1`
 
 	err := r.db.QueryRow(ctx, query, ID).Scan(&userID)
 	if err != nil {

@@ -155,7 +155,7 @@ func (r *patientRepository) GetPatient(ID int64, UserID int64) (*models.GetPatie
 		}
 		return nil, err
 	}
-	err = dRow.Scan(res.FirstName, res.LastName, res.MiddleName, res.BirthDate, res.IIN, res.Phone, res.Address, res.Email)
+	err = dRow.Scan(&res.FirstName, &res.LastName, &res.MiddleName, &res.BirthDate, &res.IIN, &res.Phone, &res.Address, &res.Email)
 	if err != nil {
 		errTX := tx.Rollback(ctx)
 		if errTX != nil {
@@ -173,7 +173,7 @@ func (r *patientRepository) GetPatient(ID int64, UserID int64) (*models.GetPatie
 		}
 		return nil, err
 	}
-	err = dRow.Scan(res.BloodType, res.EmergencyContact, res.MaritalStatus)
+	err = dRow.Scan(&res.BloodType, &res.EmergencyContact, &res.MaritalStatus)
 	if err != nil {
 		errTX := tx.Rollback(ctx)
 		if errTX != nil {
