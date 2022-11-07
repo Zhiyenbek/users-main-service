@@ -14,7 +14,7 @@ type Repository struct {
 type DoctorRepository interface {
 	CreateDoctor(doctor *models.CreateDoctorRequest) (*models.CreateDoctorResponse, error)
 	DeleteDoctor(ID int64, userID int64) error
-	UpdateDoctor(doctor *models.UpdateDoctorRequest, userID int64) (*models.GetDoctorResponse, error)
+	UpdateDoctor(doctor *models.UpdateDoctorRequest, userID int64) error
 	GetDoctor(ID int64, UserID int64) (*models.GetDoctorResponse, error)
 }
 type PatientRepository interface {
