@@ -12,16 +12,17 @@ type Repository struct {
 	AdminRepository
 }
 type DoctorRepository interface {
-	CreateDoctor(*models.CreateDoctorRequest) (*models.CreateDoctorResponse, error)
-	DeleteDoctor(ID int64) error
-	UpdateDoctor(*models.UpdateDoctorRequest) (*models.GetDoctorResponse, error)
-	GetDoctor(ID int64) (*models.GetDoctorResponse, error)
+	CreateDoctor(doctor *models.CreateDoctorRequest) (*models.CreateDoctorResponse, error)
+	DeleteDoctor(ID int64, userID int64) error
+	UpdateDoctor(doctor *models.UpdateDoctorRequest, userID int64) (*models.GetDoctorResponse, error)
+	GetDoctor(ID int64, UserID int64) (*models.GetDoctorResponse, error)
 }
 type PatientRepository interface {
-	CreatePatient(*models.CreatePatientRequest) (*models.CreatePatientResponse, error)
-	DeletePatient(ID int64) error
-	UpdatePatient(*models.UpdatePatientRequest) (*models.GetPatientResponse, error)
-	GetPatient(ID int64) (*models.GetPatientResponse, error)
+	CreatePatient(patient *models.CreatePatientRequest) (*models.CreatePatientResponse, error)
+	DeletePatient(ID int64, userID int64) error
+	UpdatePatient(patient *models.UpdatePatientRequest, userID int64) error
+	GetPatient(ID int64, UserID int64) (*models.GetPatientResponse, error)
+	GetUserIDbyID(ID int64) (int64, error)
 }
 type AdminRepository interface {
 	CheckAuth(ID int64) error
@@ -29,7 +30,7 @@ type AdminRepository interface {
 
 func New(db *pgxpool.Pool, cfg *config.Configs) *Repository {
 	return &Repository{
-		DoctorRepository:  NewDoctorRepository(db, cfg),
-		PatientRepository: NewPatientRepository(db, cfg),
+		DoctorRepository:  NewDoctorRepository(db, cfg.DB),
+		PatientRepository: NewPatientRepository(db, cfg.DB),
 	}
 }
