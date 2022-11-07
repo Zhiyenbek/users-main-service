@@ -68,3 +68,10 @@ type GetDoctorResponse struct {
 	Rating       int32
 	WebsiteUrl   string
 }
+
+type GetAllDoctorsResponse struct {
+	ID        int64
+	FirstName string
+	LastName  string
+	IIN       string
+}

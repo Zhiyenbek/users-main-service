@@ -32,7 +32,7 @@ func (r *patientRepository) CreatePatient(patient *models.CreatePatientRequest) 
 		return nil, fmt.Errorf("error occurred while creating deleting patient in users: %v", err)
 	}
 	query := `INSERT INTO users 
-				(first_name, last_name, middle_name, birthdata, iin, phone, address, email)
+				(first_name, last_name, middle_name, birthdate, iin, phone, address, email)
 			VALUES
 				($1, $2, $3, $4, $5, $6, $7, $8) RETURNING ID;`
 	dRow, err := tx.Query(ctx, query, patient.FirstName, patient.LastName, patient.MiddleName, patient.BirthDate, patient.IIN, patient.Phone, patient.Address, patient.Email)
@@ -114,7 +114,7 @@ func (r *patientRepository) UpdatePatient(patient *models.UpdatePatientRequest, 
 		return err
 	}
 	query := `UPDATE users 
-				SET first_name = $1, last_name = $2, middle_name = $3, birthdata = $4, iin = $5, phone = $6, address = $7, email = $8)
+				SET first_name = $1, last_name = $2, middle_name = $3, birthdate = $4, iin = $5, phone = $6, address = $7, email = $8
 			  WHERE id = $9`
 	_, err = tx.Exec(ctx, query, patient.FirstName, patient.LastName, patient.MiddleName, patient.BirthDate, patient.IIN, patient.Phone, patient.Address, patient.Email, userID)
 	if err != nil {
@@ -126,7 +126,7 @@ func (r *patientRepository) UpdatePatient(patient *models.UpdatePatientRequest, 
 	}
 
 	query = `UPDATE patients 
-				SET blood_type = $1, emergency_contact = $2, martial_status = $3)
+				SET blood_type = $1, emergency_contact = $2, marital_status = $3
 			  WHERE id = $4`
 	_, err = tx.Query(ctx, query, patient.BloodType, patient.EmergencyContact, patient.MaritalStatus, userID)
 	if err != nil {
@@ -146,7 +146,7 @@ func (r *patientRepository) GetPatient(ID int64, UserID int64) (*models.GetPatie
 	if err != nil {
 		return nil, err
 	}
-	query := `SELECT (first_name, last_name, middle_name, birthdata, iin, phone, address, email) FROM users WHERE id=$1`
+	query := `SELECT (first_name, last_name, middle_name, birthdate, iin, phone, address, email) FROM users WHERE id=$1`
 	dRow, err := tx.Query(ctx, query, ID)
 	if err != nil {
 		errTX := tx.Rollback(ctx)
@@ -164,7 +164,7 @@ func (r *patientRepository) GetPatient(ID int64, UserID int64) (*models.GetPatie
 		return nil, fmt.Errorf("error occurred while getting patient INFO from users: %v", err)
 	}
 
-	query = `SELECT (blood_type, emergency_contact, martial_status, user_id) FROM patients WHERE id=$1`
+	query = `SELECT (blood_type, emergency_contact, marital_status, user_id) FROM patients WHERE id=$1`
 	dRow, err = tx.Query(ctx, query, ID)
 	if err != nil {
 		errTX := tx.Rollback(ctx)
@@ -188,7 +188,7 @@ func (r *patientRepository) GetUserIDbyID(ID int64) (int64, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), r.cfg.TimeOut)
 	defer cancel()
 	var userID int64
-	query := `SELECT user_id FROM patient where ID = $1`
+	query := `SELECT user_id FROM patients where ID = $1`
 
 	err := r.db.QueryRow(ctx, query, ID).Scan(&userID)
 	if err != nil {
@@ -198,4 +198,34 @@ func (r *patientRepository) GetUserIDbyID(ID int64) (int64, error) {
 		return -1, fmt.Errorf("error occurred while getting userID from patients: %v", err)
 	}
 	return userID, nil
+}
+
+func (r *patientRepository) GetAllPatients() ([]*models.GetAllPatientsResponse, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), r.cfg.TimeOut)
+	defer cancel()
+	var userID int64
+	var first_name, last_name string
+	query := `SELECT id, first_name, last_name FROM users`
+
+	rows, err := r.db.Query(ctx, query)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, fmt.Errorf("%w error occurred while getting rows from users: %v", models.ErrPatientNotFound, err)
+		}
+		return nil, fmt.Errorf("error occurred while getting rows from users: %v", err)
+	}
+	defer rows.Close()
+	result := make([]*models.GetAllPatientsResponse, 0, 100)
+	for rows.Next() {
+		err := rows.Scan(&userID, &first_name, &last_name)
+		if err != nil {
+			return nil, fmt.Errorf("%w error occurred while scanning row from users: %v", models.ErrPatientNotFound, err)
+		}
+		result = append(result, &models.GetAllPatientsResponse{
+			ID:        userID,
+			FirstName: first_name,
+			LastName:  last_name,
+		})
+	}
+	return result, nil
 }

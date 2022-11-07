@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
   last_name text NOT NULL ,
   middle_name text, 
   birthdate text not NULL,
-  iin bigint not NULL, 
+  iin text not NULL, 
   phone text not NULL, 
   address text not NULL, 
   email text UNIQUE ,
