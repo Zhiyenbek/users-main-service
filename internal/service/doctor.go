@@ -1,6 +1,8 @@
 package service
 
 import (
+	"log"
+
 	"github.com/Zhiyenbek/users-main-service/config"
 	"github.com/Zhiyenbek/users-main-service/internal/models"
 	"github.com/Zhiyenbek/users-main-service/internal/repository"
@@ -19,14 +21,34 @@ func NewDoctorService(repo *repository.Repository, cfg *config.Configs) DoctorSe
 }
 
 func (s *doctorService) UpdateDoctor(doctorReq *models.UpdateDoctorRequest) error {
-	return s.doctorRepo.UpdateDoctor(doctorReq, 0)
+	err := s.doctorRepo.UpdateDoctor(doctorReq, 0)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
 }
 func (s *doctorService) CreateDoctor(doctorReq *models.CreateDoctorRequest) (*models.CreateDoctorResponse, error) {
-	return s.doctorRepo.CreateDoctor(doctorReq)
+	res, err := s.doctorRepo.CreateDoctor(doctorReq)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return res, nil
 }
 func (s *doctorService) DeleteDoctor(ID int64) error {
-	return s.doctorRepo.DeleteDoctor(ID, 0)
+	err := s.doctorRepo.DeleteDoctor(ID, 0)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
 }
-func (s *doctorService) GetDoctor(ID int64) error {
-	return s.doctorRepo.DeleteDoctor(ID, 0)
+func (s *doctorService) GetDoctor(ID int64) (*models.GetDoctorResponse, error) {
+	res, err := s.doctorRepo.GetDoctor(ID, 0)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return res, nil
 }

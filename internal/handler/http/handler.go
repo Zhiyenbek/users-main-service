@@ -24,13 +24,16 @@ func New(services *service.Service, cfg *config.Configs) Handler {
 
 func (h *handler) InitRoutes() *gin.Engine {
 	router := gin.Default()
-	patient := router.Group("/patients")
+	router.POST("/sign-in", h.SignIn)
+	router.POST("/refresh-token", h.RefreshToken)
+
+	patient := router.Group("/patients", h.VerifyToken)
 
 	patient.PUT("/:patient_id", h.UpdatePatient)
-	patient.GET("/:patient_id", h.GetPatient)
-	patient.POST("/sign_up", h.RegisterPatient)
+	patient.GET("/:patient_id", h.VerifyToken, h.GetPatient)
+	patient.POST("/sign_up", h.VerifyToken, h.RegisterPatient)
 
-	doctor := router.Group("/doctors")
+	doctor := router.Group("/doctors", h.VerifyToken)
 	doctor.POST("/sign-up", h.RegisterDoctor)
 	doctor.PUT("/:doctor_id", h.UpdateDoctor)
 	doctor.GET("/:doctor_id", h.GetDoctor)

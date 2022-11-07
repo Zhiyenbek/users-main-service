@@ -1,5 +1,5 @@
 app:
-  port: 8080
+  port: 3000
   timeout: 60
 db:
   host: postgres
@@ -10,7 +10,13 @@ db:
   ssl_mode: disable
   timeout: 20
 redis:
-  host: 
-  port: 
-  db: 
-
+  host: redis
+  port: 6379
+  db: 0
+token:
+  access:
+    token_secret: superdupersecret
+    ttl: 900
+  refresh:
+    token_secret: superdupersecretofsecrets
+    ttl: 9000

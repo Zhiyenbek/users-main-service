@@ -11,6 +11,7 @@ type Configs struct {
 	App   *AppConfig
 	DB    *DBConf
 	Redis *RedisConf
+	Token *Token
 }
 
 type AppConfig struct {
@@ -35,6 +36,14 @@ type RedisConf struct {
 	Password string
 	DB       int
 }
+type Token struct {
+	Refresh *TokenConf
+	Access  *TokenConf
+}
+type TokenConf struct {
+	TokenSecret string
+	ExpiresAt   time.Duration
+}
 
 func New() (*Configs, error) {
 	vi := viper.New()
@@ -54,7 +63,7 @@ func New() (*Configs, error) {
 	vi.SetDefault("app.timeout", 60)
 
 	//redis default values
-	vi.SetDefault("redis.port", 6370)
+	vi.SetDefault("redis.port", 6379)
 	err := vi.ReadInConfig()
 
 	if err != nil {
@@ -74,6 +83,17 @@ func New() (*Configs, error) {
 		return nil, fmt.Errorf("error while parsing config. Redis host not defined")
 	}
 
+	atTokenSecret := vi.GetString("token.access.token_secret")
+	rtTokenSecret := vi.GetString("token.refresh.token_secret")
+	if atTokenSecret == "" || rtTokenSecret == "" {
+		return nil, fmt.Errorf("error while parsing config. Token secrets not defined")
+	}
+
+	atTokenTTL := vi.GetInt("token.access.ttl")
+	rtTokenTTL := vi.GetInt("token.refresh.ttl")
+	if atTokenTTL == 0 || rtTokenTTL == 0 {
+		return nil, fmt.Errorf("error while parsing config. Token ttl's not defined")
+	}
 	return &Configs{
 		App: &AppConfig{
 			TimeOut: time.Second * time.Duration(vi.GetInt("app.timeout")),
@@ -86,11 +106,22 @@ func New() (*Configs, error) {
 			Password: vi.GetString("db.password"),
 			SSLMode:  vi.GetString("db.ssl_mode"),
 			TimeOut:  time.Second * time.Duration(vi.GetInt("db.timeout")),
+			DBName:   dbName,
 		},
 		Redis: &RedisConf{
 			Host: redisHost,
 			DB:   vi.GetInt("redis.db"),
 			Port: vi.GetInt("redis.port"),
+		},
+		Token: &Token{
+			Access: &TokenConf{
+				TokenSecret: atTokenSecret,
+				ExpiresAt:   time.Second * time.Duration(atTokenTTL),
+			},
+			Refresh: &TokenConf{
+				TokenSecret: rtTokenSecret,
+				ExpiresAt:   time.Second * time.Duration(rtTokenTTL),
+			},
 		},
 	}, nil
 }

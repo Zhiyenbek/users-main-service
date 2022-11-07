@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
   iin text not NULL, 
   phone text not NULL, 
   address text not NULL, 
-  email text UNIQUE ,
+  email text,
   
   _created_at timestamp DEFAULT now() NOT NULL ,
   _modified_at timestamp DEFAULT now() NOT NULL ,
@@ -39,3 +39,8 @@ CREATE TABLE IF NOT EXISTS doctors (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS auth (
+  user_id bigserial,
+  login text not NULL,
+  password text not NULL
+);

@@ -28,7 +28,13 @@ func Run() error {
 		return err
 	}
 	defer db.Close()
-	repos := repository.New(db, cfg)
+	redis, err := connection.NewRedis(cfg.Redis)
+	if err != nil {
+		log.Printf("ERROR: error while creating redis clinet: %v", err)
+		return err
+	}
+	defer redis.Close()
+	repos := repository.New(db, cfg, redis)
 	services := service.New(repos, cfg)
 	handlers := handler.New(services, cfg)
 	srv := http.Server{
