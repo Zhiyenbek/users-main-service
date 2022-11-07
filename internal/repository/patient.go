@@ -185,16 +185,19 @@ func (r *patientRepository) GetPatient(ID int64, UserID int64) (*models.GetPatie
 		}
 		return nil, err
 	}
-	err = dRow.Scan(&res.FirstName, &res.LastName, &res.MiddleName, &res.BirthDate, &res.IIN, &res.Phone, &res.Address, &res.Email)
-	if err != nil {
-		errTX := tx.Rollback(ctx)
-		if errTX != nil {
-			log.Printf("ERROR: transaction: %s", errTX)
+
+	if dRow.Next() {
+		err = dRow.Scan(&res.FirstName, &res.LastName, &res.MiddleName, &res.BirthDate, &res.IIN, &res.Phone, &res.Address, &res.Email)
+		if err != nil {
+			errTX := tx.Rollback(ctx)
+			if errTX != nil {
+				log.Printf("ERROR: transaction: %s", errTX)
+			}
+			return nil, fmt.Errorf("error occurred while getting patient INFO from users: %v", err)
 		}
-		return nil, fmt.Errorf("error occurred while getting patient INFO from users: %v", err)
 	}
 	dRow.Close()
-	query = `SELECT (blood_type, emergency_contact, marital_status, user_id) FROM patients WHERE id=$1`
+	query = `SELECT blood_type, emergency_contact, marital_status, user_id FROM patients WHERE id=$1`
 	dRow, err = tx.Query(ctx, query, ID)
 	if err != nil {
 		errTX := tx.Rollback(ctx)
@@ -203,14 +206,17 @@ func (r *patientRepository) GetPatient(ID int64, UserID int64) (*models.GetPatie
 		}
 		return nil, err
 	}
-	err = dRow.Scan(&res.BloodType, &res.EmergencyContact, &res.MaritalStatus)
-	if err != nil {
-		errTX := tx.Rollback(ctx)
-		if errTX != nil {
-			log.Printf("ERROR: transaction: %s", errTX)
+	if dRow.Next() {
+		err = dRow.Scan(&res.BloodType, &res.EmergencyContact, &res.MaritalStatus)
+		if err != nil {
+			errTX := tx.Rollback(ctx)
+			if errTX != nil {
+				log.Printf("ERROR: transaction: %s", errTX)
+			}
+			return nil, fmt.Errorf("error occurred while getting patient INFO from patients: %v", err)
 		}
-		return nil, fmt.Errorf("error occurred while getting patient INFO from patients: %v", err)
 	}
+
 	dRow.Close()
 	err = tx.Commit(ctx)
 	if err != nil {
