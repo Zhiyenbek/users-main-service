@@ -7,6 +7,7 @@ require (
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-redis/redis/v7 v7.4.1
 	github.com/jackc/pgx/v4 v4.17.2
+	github.com/rs/cors/wrapper/gin v0.0.0-20221003140808-fcebdb403f4d
 	github.com/spf13/viper v1.13.0
 	golang.org/x/crypto v0.1.0
 )
@@ -36,6 +37,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.5 // indirect
+	github.com/rs/cors v1.8.1 // indirect
 	github.com/spf13/afero v1.8.2 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect

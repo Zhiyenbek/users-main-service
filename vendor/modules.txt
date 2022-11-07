@@ -117,6 +117,12 @@ github.com/pelletier/go-toml/v2
 github.com/pelletier/go-toml/v2/internal/ast
 github.com/pelletier/go-toml/v2/internal/danger
 github.com/pelletier/go-toml/v2/internal/tracker
+# github.com/rs/cors v1.8.1
+## explicit; go 1.13
+github.com/rs/cors
+# github.com/rs/cors/wrapper/gin v0.0.0-20221003140808-fcebdb403f4d
+## explicit; go 1.17
+github.com/rs/cors/wrapper/gin
 # github.com/spf13/afero v1.8.2
 ## explicit; go 1.13
 github.com/spf13/afero

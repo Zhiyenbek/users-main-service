@@ -1,0 +1,11 @@
+"department_id": 1
+"spec_id" : 1
+"experience" : 2
+"photo" : "bbb"
+"category" : "Highest"
+"price" : 300
+"schedule" : "8-18"
+"degree" : "Surgeon"
+"rating" : 5
+
+ (1, 1, 2, 'bbb', 'Highest', 500, '8-18', 't',  5, NULL, 1)
