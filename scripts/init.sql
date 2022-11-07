@@ -19,7 +19,8 @@ CREATE TABLE IF NOT EXISTS patients (
   blood_type smallint not NULL, 
   emergency_contact text not NULL, 
   marital_status text not NULL,
-  FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE
+  user_id bigint not NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS doctors (
@@ -34,6 +35,7 @@ CREATE TABLE IF NOT EXISTS doctors (
   degree text not NULL, 
   rating int not NULL,
   website_url text,
-  FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE
+  user_id bigint not NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
