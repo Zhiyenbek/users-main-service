@@ -34,7 +34,7 @@ func (r *patientRepository) CreatePatient(patient *models.CreatePatientRequest) 
 	query := `INSERT INTO users 
 				(first_name, last_name, middle_name, birthdate, iin, phone, address, email)
 			VALUES
-				($1, $2, $3, $4, $5, $6, $7, $8) RETURNING ID;`
+				($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;`
 	dRow, err := tx.Query(ctx, query, patient.FirstName, patient.LastName, patient.MiddleName, patient.BirthDate, patient.IIN, patient.Phone, patient.Address, patient.Email)
 	if err != nil {
 		errTX := tx.Rollback(ctx)
@@ -55,7 +55,7 @@ func (r *patientRepository) CreatePatient(patient *models.CreatePatientRequest) 
 	}
 	dRow.Close()
 	query = `INSERT INTO patients 
-		(blood_type, emergency_contact, marital_status, user_id)
+		(blood_type, emergency_contact, marital_status, id)
 			VALUES
 		($1, $2, $3, $4) RETURNING id;`
 	dRow, err = tx.Query(ctx, query, patient.BloodType, patient.EmergencyContact, patient.MaritalStatus, userID)
@@ -203,22 +203,6 @@ func (r *patientRepository) GetPatient(ID int64) (*models.GetPatientResponse, er
 		return nil, fmt.Errorf("error occurred while deleting patient from users: %v", err)
 	}
 	return res, nil
-}
-
-func (r *patientRepository) GetUserIDbyID(ID int64) (int64, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), r.cfg.TimeOut)
-	defer cancel()
-	var userID int64
-	query := `SELECT user_id FROM patients where ID = $1`
-
-	err := r.db.QueryRow(ctx, query, ID).Scan(&userID)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return -1, fmt.Errorf("%w error occurred while getting userID from patients: %v", models.ErrPatientNotFound, err)
-		}
-		return -1, fmt.Errorf("error occurred while getting userID from patients: %v", err)
-	}
-	return userID, nil
 }
 
 func (r *patientRepository) GetAllPatients() ([]*models.GetAllPatientsResponse, error) {
