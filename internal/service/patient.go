@@ -1,6 +1,8 @@
 package service
 
 import (
+	"log"
+
 	"github.com/Zhiyenbek/users-main-service/config"
 	"github.com/Zhiyenbek/users-main-service/internal/models"
 	"github.com/Zhiyenbek/users-main-service/internal/repository"
@@ -48,6 +50,14 @@ func (s *patientService) GetPatient(ID int64) (*models.GetPatientResponse, error
 	res, err := s.patientRepo.GetPatient(ID)
 	if err != nil {
 		s.logger.Error(err)
+		return nil, err
+	}
+	return res, nil
+}
+func (s *patientService) GetAllPatients() ([]*models.GetAllPatientsResponse, error) {
+	res, err := s.patientRepo.GetAllPatients()
+	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	return res, nil

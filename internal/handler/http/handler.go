@@ -37,6 +37,7 @@ func (h *handler) InitRoutes() *gin.Engine {
 	patient.PUT("/:patient_id", h.UpdatePatient)
 	patient.GET("/:patient_id", h.VerifyToken, h.GetPatient)
 	patient.POST("/sign-up", h.VerifyToken, h.RegisterPatient)
+	patient.GET("/all", h.GetAllPatients)
 
 	doctor := router.Group("/doctors", h.VerifyToken)
 	doctor.POST("/sign-up", h.RegisterDoctor)

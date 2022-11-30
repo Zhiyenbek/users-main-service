@@ -20,6 +20,7 @@ type PatientService interface {
 	CreatePatient(pateintReq *models.CreatePatientRequest) (*models.CreatePatientResponse, error)
 	DeletePatient(ID int64) error
 	GetPatient(ID int64) (*models.GetPatientResponse, error)
+	GetAllPatients() ([]*models.GetAllPatientsResponse, error)
 }
 type AuthService interface {
 	Login(creds *models.UserSignInRequest) (*models.Tokens, error)
