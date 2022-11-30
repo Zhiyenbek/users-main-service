@@ -397,3 +397,26 @@ func (r *doctorRepository) SearchDoctorsByDepartment(searchArgs *models.Search, 
 		Count:   count,
 	}, nil
 }
+
+func (r *doctorRepository) GetDepartments() (*models.GetDepartments, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), r.cfg.TimeOut)
+	defer cancel()
+	query := `SELECT id, name from departments`
+	rows, err := r.db.Query(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("error occured while quering in getting departments %v", err)
+	}
+	defer rows.Close()
+	var deps []*models.Department
+	for rows.Next() {
+		dep := &models.Department{}
+		err := rows.Scan(&dep.ID, &dep.Name)
+		if err != nil {
+			return nil, fmt.Errorf("error occured while scanning in getting departments %v", err)
+		}
+		deps = append(deps, dep)
+	}
+	return &models.GetDepartments{
+		Departments: deps,
+	}, nil
+}

@@ -47,6 +47,7 @@ func (h *handler) InitRoutes() *gin.Engine {
 	doctor.GET("", h.SearchDoctor)
 	doctor.GET("/departments/:department_id", h.GetDoctorByDepartment)
 
+	doctor.GET("/departments", h.GetDepartments)
 	return router
 }
 

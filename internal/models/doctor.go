@@ -80,3 +80,11 @@ type SearchDoctorsResponse struct {
 	Doctors []*GetDoctorResponse `json:"doctors"`
 	Count   int                  `json:"count"`
 }
+
+type GetDepartments struct {
+	Departments []*Department `json:"departments"`
+}
+type Department struct {
+	ID   int64  `json:"department_id"`
+	Name string `json:"department_name"`
+}

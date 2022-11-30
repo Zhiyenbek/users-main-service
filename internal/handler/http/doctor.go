@@ -40,6 +40,7 @@ func (h *handler) UpdateDoctor(c *gin.Context) {
 	if err != nil || id < 1 {
 		log.Printf("ERROR: invalid input, missing user id: \n")
 		c.AbortWithStatusJSON(400, sendResponse(-1, nil, models.ErrInvalidInput))
+		return
 	}
 	req.ID = int64(id)
 	err = h.service.DoctorService.UpdateDoctor(req)
@@ -62,6 +63,7 @@ func (h *handler) DeleteDoctor(c *gin.Context) {
 	if err != nil || id < 1 {
 		log.Printf("ERROR: invalid input, missing user id: \n")
 		c.AbortWithStatusJSON(400, sendResponse(-1, nil, models.ErrInvalidInput))
+		return
 	}
 
 	err = h.service.DoctorService.DeleteDoctor(int64(id))
@@ -84,6 +86,7 @@ func (h *handler) GetDoctor(c *gin.Context) {
 	if err != nil || id < 1 {
 		log.Printf("ERROR: invalid input, missing user id: \n")
 		c.AbortWithStatusJSON(400, sendResponse(-1, nil, models.ErrInvalidInput))
+		return
 	}
 
 	res, err := h.service.DoctorService.GetDoctor(int64(id))
@@ -131,6 +134,7 @@ func (h *handler) GetDoctorByDepartment(c *gin.Context) {
 	if err != nil || id < 1 {
 		log.Printf("ERROR: invalid input, missing user id: \n")
 		c.AbortWithStatusJSON(400, sendResponse(-1, nil, models.ErrInvalidInput))
+		return
 	}
 	pageNum, err := strconv.Atoi(c.Query("page_num"))
 	if err != nil || pageNum < 1 {
@@ -145,6 +149,16 @@ func (h *handler) GetDoctorByDepartment(c *gin.Context) {
 		PageSize: pageSize,
 	}
 	res, err := h.service.GetDoctorByDepartment(int64(id), searchArgs)
+	if err != nil {
+		c.AbortWithStatusJSON(500, sendResponse(-1, nil, models.ErrInternalServer))
+		return
+	}
+	c.JSON(200, sendResponse(0, res, nil))
+}
+
+func (h *handler) GetDepartments(c *gin.Context) {
+
+	res, err := h.service.GetDepartments()
 	if err != nil {
 		c.AbortWithStatusJSON(500, sendResponse(-1, nil, models.ErrInternalServer))
 		return

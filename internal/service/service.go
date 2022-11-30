@@ -14,6 +14,7 @@ type DoctorService interface {
 	GetDoctor(ID int64) (*models.GetDoctorResponse, error)
 	SearchDoctors(*models.Search) (*models.SearchDoctorsResponse, error)
 	GetDoctorByDepartment(int64, *models.Search) (*models.SearchDoctorsResponse, error)
+	GetDepartments() (*models.GetDepartments, error)
 }
 type PatientService interface {
 	UpdatePatient(patientReq *models.UpdatePatientRequest) error

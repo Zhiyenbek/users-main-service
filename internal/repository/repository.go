@@ -20,6 +20,7 @@ type DoctorRepository interface {
 	GetDoctor(ID int64) (*models.GetDoctorResponse, error)
 	SearchDoctors(*models.Search) (*models.SearchDoctorsResponse, error)
 	SearchDoctorsByDepartment(*models.Search, int64) (*models.SearchDoctorsResponse, error)
+	GetDepartments() (*models.GetDepartments, error)
 }
 
 type PatientRepository interface {

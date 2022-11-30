@@ -72,3 +72,12 @@ func (s *doctorService) GetDoctorByDepartment(ID int64, search *models.Search) (
 	}
 	return res, nil
 }
+
+func (s *doctorService) GetDepartments() (*models.GetDepartments, error) {
+	res, err := s.doctorRepo.GetDepartments()
+	if err != nil {
+		s.logger.Error(err)
+		return nil, err
+	}
+	return res, nil
+}
