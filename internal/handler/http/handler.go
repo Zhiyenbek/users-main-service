@@ -5,21 +5,24 @@ import (
 	"github.com/Zhiyenbek/users-main-service/internal/service"
 	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
+	"go.uber.org/zap"
 )
 
 type handler struct {
 	service *service.Service
 	cfg     *config.Configs
+	logger  *zap.SugaredLogger
 }
 
 type Handler interface {
 	InitRoutes() *gin.Engine
 }
 
-func New(services *service.Service, cfg *config.Configs) Handler {
+func New(services *service.Service, logger *zap.SugaredLogger, cfg *config.Configs) Handler {
 	return &handler{
 		service: services,
 		cfg:     cfg,
+		logger:  logger,
 	}
 }
 
@@ -40,6 +43,8 @@ func (h *handler) InitRoutes() *gin.Engine {
 	doctor.PUT("/:doctor_id", h.UpdateDoctor)
 	doctor.GET("/:doctor_id", h.GetDoctor)
 	doctor.DELETE("/:doctor_id", h.DeleteDoctor)
+	doctor.GET("", h.SearchDoctor)
+	doctor.GET("/departments/:department_id", h.GetDoctorByDepartment)
 
 	return router
 }

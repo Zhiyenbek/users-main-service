@@ -14,38 +14,44 @@ import (
 	"github.com/Zhiyenbek/users-main-service/internal/repository"
 	"github.com/Zhiyenbek/users-main-service/internal/repository/connection"
 	"github.com/Zhiyenbek/users-main-service/internal/service"
+	"go.uber.org/zap"
 )
 
 func Run() error {
+	logger, _ := zap.NewDevelopment(zap.AddStacktrace(zap.PanicLevel))
+
+	defer logger.Sync() // flushes buffer, if any
+	sugar := logger.Sugar()
+
 	cfg, err := config.New()
 	if err != nil {
-		log.Println(err)
+		sugar.Errorf("error while defining config %v", err)
 		return err
 	}
 	db, err := connection.NewPostgresDB(cfg.DB)
 	if err != nil {
-		log.Printf("ERROR: error while creating database: %v", err)
+		sugar.Errorf("error while creating database: %v", err)
 		return err
 	}
 	defer db.Close()
 	redis, err := connection.NewRedis(cfg.Redis)
 	if err != nil {
-		log.Printf("ERROR: error while creating redis clinet: %v", err)
+		sugar.Errorf("error while creating redis clinet: %v", err)
 		return err
 	}
 	defer redis.Close()
 	repos := repository.New(db, cfg, redis)
-	services := service.New(repos, cfg)
-	handlers := handler.New(services, cfg)
+	services := service.New(repos, sugar, cfg)
+	handlers := handler.New(services, sugar, cfg)
 	srv := http.Server{
 		Addr:    ":" + strconv.Itoa(cfg.App.Port),
 		Handler: handlers.InitRoutes(),
 	}
 	errChan := make(chan error, 1)
 	go func(errChan chan<- error) {
-		log.Printf("server on port: %d have started\n", cfg.App.Port)
+		sugar.Infof("server on port: %d have started", cfg.App.Port)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Println(err)
+			sugar.Error(err)
 			errChan <- err
 		}
 	}(errChan)
@@ -57,7 +63,7 @@ func Run() error {
 	case <-quit:
 		log.Println("killing signal was received, shutting down the server")
 	case err := <-errChan:
-		log.Printf("ERROR: HTTP server error received: %v", err)
+		sugar.Errorf("ERROR: HTTP server error received: %v", err)
 	}
 
 	log.Println("Shutting down server...")
@@ -65,7 +71,7 @@ func Run() error {
 	ctx, cancel := context.WithTimeout(context.Background(), cfg.App.TimeOut)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Printf("WARN: Server forced to shutdown: %v", err)
+		sugar.Errorf("WARN: Server forced to shutdown: %v", err)
 	}
 	return nil
 

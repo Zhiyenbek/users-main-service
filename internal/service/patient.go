@@ -1,67 +1,53 @@
 package service
 
 import (
-	"log"
-
 	"github.com/Zhiyenbek/users-main-service/config"
 	"github.com/Zhiyenbek/users-main-service/internal/models"
 	"github.com/Zhiyenbek/users-main-service/internal/repository"
+	"go.uber.org/zap"
 )
 
 type patientService struct {
-	PatientRepo repository.PatientRepository
+	patientRepo repository.PatientRepository
+	logger      *zap.SugaredLogger
 	cfg         *config.Configs
 }
 
-func NewPatientService(repo *repository.Repository, cfg *config.Configs) PatientService {
+func NewPatientService(repo *repository.Repository, logger *zap.SugaredLogger, cfg *config.Configs) PatientService {
 	return &patientService{
-		PatientRepo: repo.PatientRepository,
+		patientRepo: repo.PatientRepository,
+		logger:      logger,
 		cfg:         cfg,
 	}
 }
 func (s *patientService) UpdatePatient(patientReq *models.UpdatePatientRequest) error {
-	userID, err := s.PatientRepo.GetUserIDbyID(patientReq.ID)
+	err := s.patientRepo.UpdatePatient(patientReq)
 	if err != nil {
-		log.Println(err)
-		return err
-	}
-	err = s.PatientRepo.UpdatePatient(patientReq, userID)
-	if err != nil {
-		log.Println(err)
+		s.logger.Error(err)
 		return err
 	}
 	return nil
 }
 func (s *patientService) CreatePatient(patientReq *models.CreatePatientRequest) (*models.CreatePatientResponse, error) {
-	res, err := s.PatientRepo.CreatePatient(patientReq)
+	res, err := s.patientRepo.CreatePatient(patientReq)
 	if err != nil {
-		log.Println(err)
+		s.logger.Error(err)
 		return nil, err
 	}
 	return res, nil
 }
 func (s *patientService) DeletePatient(ID int64) error {
-	userID, err := s.PatientRepo.GetUserIDbyID(ID)
+	err := s.patientRepo.DeletePatient(ID)
 	if err != nil {
-		log.Println(err)
-		return err
-	}
-	err = s.PatientRepo.DeletePatient(ID, userID)
-	if err != nil {
-		log.Println(err)
+		s.logger.Error(err)
 		return err
 	}
 	return nil
 }
 func (s *patientService) GetPatient(ID int64) (*models.GetPatientResponse, error) {
-	userID, err := s.PatientRepo.GetUserIDbyID(ID)
+	res, err := s.patientRepo.GetPatient(ID)
 	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-	res, err := s.PatientRepo.GetPatient(ID, userID)
-	if err != nil {
-		log.Println(err)
+		s.logger.Error(err)
 		return nil, err
 	}
 	return res, nil

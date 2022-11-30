@@ -90,45 +90,21 @@ func (r *patientRepository) CreatePatient(patient *models.CreatePatientRequest) 
 	}, nil
 
 }
-func (r *patientRepository) DeletePatient(ID int64, userID int64) error {
+func (r *patientRepository) DeletePatient(ID int64) error {
 	ctx, cancel := context.WithTimeout(context.Background(), r.cfg.TimeOut)
 	defer cancel()
 
-	tx, err := r.db.BeginTx(ctx, pgx.TxOptions{})
+	query := `DELETE FROM users WHERE id=$1`
+	rows, err := r.db.Exec(ctx, query, ID)
 	if err != nil {
-		return err
+		return fmt.Errorf("error occurred while deleting patient: %v", err)
 	}
-
-	query := `DELETE FROM patients WHERE id=$1`
-	_, err = tx.Exec(ctx, query, ID)
-	if err != nil {
-		errTX := tx.Rollback(ctx)
-		if errTX != nil {
-			log.Printf("ERROR: transaction error: %s", errTX)
-		}
-		return fmt.Errorf("error occurred while getting deleting patient from users: %v", err)
-	}
-
-	query = `DELETE FROM users WHERE id=$1`
-	_, err = tx.Exec(ctx, query, userID)
-	if err != nil {
-		errTX := tx.Rollback(ctx)
-		if errTX != nil {
-			log.Printf("ERROR: transaction error: %s", errTX)
-		}
-		return fmt.Errorf("error occurred while getting deleting patient from patients: %v", err)
-	}
-	err = tx.Commit(ctx)
-	if err != nil {
-		errTX := tx.Rollback(ctx)
-		if errTX != nil {
-			log.Printf("ERROR: transaction error: %s", errTX)
-		}
-		return fmt.Errorf("error occurred while deleting patient from users: %v", err)
+	if rows.RowsAffected() < 1 {
+		return fmt.Errorf("error: no patient in db with such id %d", ID)
 	}
 	return nil
 }
-func (r *patientRepository) UpdatePatient(patient *models.UpdatePatientRequest, userID int64) error {
+func (r *patientRepository) UpdatePatient(patient *models.UpdatePatientRequest) error {
 	ctx, cancel := context.WithTimeout(context.Background(), r.cfg.TimeOut)
 	defer cancel()
 	tx, err := r.db.BeginTx(ctx, pgx.TxOptions{})
@@ -138,7 +114,7 @@ func (r *patientRepository) UpdatePatient(patient *models.UpdatePatientRequest, 
 	query := `UPDATE users 
 				SET first_name = $1, last_name = $2, middle_name = $3, birthdate = $4, iin = $5, phone = $6, address = $7, email = $8
 			  WHERE id = $9`
-	_, err = tx.Exec(ctx, query, patient.FirstName, patient.LastName, patient.MiddleName, patient.BirthDate, patient.IIN, patient.Phone, patient.Address, patient.Email, userID)
+	_, err = tx.Exec(ctx, query, patient.FirstName, patient.LastName, patient.MiddleName, patient.BirthDate, patient.IIN, patient.Phone, patient.Address, patient.Email, patient.ID)
 	if err != nil {
 		errTX := tx.Rollback(ctx)
 		if errTX != nil {
@@ -168,7 +144,7 @@ func (r *patientRepository) UpdatePatient(patient *models.UpdatePatientRequest, 
 	}
 	return nil
 }
-func (r *patientRepository) GetPatient(ID int64, UserID int64) (*models.GetPatientResponse, error) {
+func (r *patientRepository) GetPatient(ID int64) (*models.GetPatientResponse, error) {
 	res := &models.GetPatientResponse{}
 	ctx, cancel := context.WithTimeout(context.Background(), r.cfg.TimeOut)
 	defer cancel()
@@ -177,7 +153,7 @@ func (r *patientRepository) GetPatient(ID int64, UserID int64) (*models.GetPatie
 		return nil, err
 	}
 	query := `SELECT first_name, last_name, middle_name, birthdate, iin, phone, address, email FROM users WHERE id=$1`
-	dRow, err := tx.Query(ctx, query, UserID)
+	dRow, err := tx.Query(ctx, query, ID)
 	if err != nil {
 		errTX := tx.Rollback(ctx)
 		if errTX != nil {

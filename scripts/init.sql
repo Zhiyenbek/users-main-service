@@ -15,16 +15,15 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS patients (
-  id bigserial,
+  id bigint,
   blood_type smallint not NULL, 
   emergency_contact text not NULL, 
   marital_status text not NULL,
-  user_id bigint not NULL,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS doctors (
-  id bigserial,
+  id bigint,
   department_id int NOT NULL,
   spec_id int not NULL, 
   experience int not NULL, 
@@ -35,8 +34,18 @@ CREATE TABLE IF NOT EXISTS doctors (
   degree text not NULL, 
   rating int not NULL,
   website_url text,
-  user_id bigint not NULL,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS specs (
+  id bigserial,
+  name text NOT NULL,
+  description text NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS departments (
+  id bigserial,
+  name text NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS auth (
@@ -44,3 +53,7 @@ CREATE TABLE IF NOT EXISTS auth (
   login text not NULL,
   password text not NULL
 );
+
+CREATE INDEX departments_idx_id ON "departments" ("id");
+CREATE INDEX doctors_idx_id ON "doctors" ("id");
+CREATE INDEX users_idx_id ON "users" ("ID");

@@ -1,34 +1,30 @@
 package service
 
 import (
-	"log"
-
 	"github.com/Zhiyenbek/users-main-service/config"
 	"github.com/Zhiyenbek/users-main-service/internal/models"
 	"github.com/Zhiyenbek/users-main-service/internal/repository"
+	"go.uber.org/zap"
 )
 
 type doctorService struct {
 	doctorRepo repository.DoctorRepository
+	logger     *zap.SugaredLogger
 	cfg        *config.Configs
 }
 
-func NewDoctorService(repo *repository.Repository, cfg *config.Configs) DoctorService {
+func NewDoctorService(repo *repository.Repository, logger *zap.SugaredLogger, cfg *config.Configs) DoctorService {
 	return &doctorService{
 		doctorRepo: repo.DoctorRepository,
+		logger:     logger,
 		cfg:        cfg,
 	}
 }
 
 func (s *doctorService) UpdateDoctor(doctorReq *models.UpdateDoctorRequest) error {
-	userID, err := s.doctorRepo.GetUserIDbyID(doctorReq.ID)
+	err := s.doctorRepo.UpdateDoctor(doctorReq)
 	if err != nil {
-		log.Println(err)
-		return err
-	}
-	err = s.doctorRepo.UpdateDoctor(doctorReq, userID)
-	if err != nil {
-		log.Println(err)
+		s.logger.Error(err)
 		return err
 	}
 	return nil
@@ -37,33 +33,41 @@ func (s *doctorService) CreateDoctor(doctorReq *models.CreateDoctorRequest) (*mo
 
 	res, err := s.doctorRepo.CreateDoctor(doctorReq)
 	if err != nil {
-		log.Println(err)
+		s.logger.Error(err)
 		return nil, err
 	}
 	return res, nil
 }
 func (s *doctorService) DeleteDoctor(ID int64) error {
-	userID, err := s.doctorRepo.GetUserIDbyID(ID)
+	err := s.doctorRepo.DeleteDoctor(ID)
 	if err != nil {
-		log.Println(err)
-		return err
-	}
-	err = s.doctorRepo.DeleteDoctor(ID, userID)
-	if err != nil {
-		log.Println(err)
+		s.logger.Error(err)
 		return err
 	}
 	return nil
 }
 func (s *doctorService) GetDoctor(ID int64) (*models.GetDoctorResponse, error) {
-	userID, err := s.doctorRepo.GetUserIDbyID(ID)
+	res, err := s.doctorRepo.GetDoctor(ID)
 	if err != nil {
-		log.Println(err)
+		s.logger.Error(err)
 		return nil, err
 	}
-	res, err := s.doctorRepo.GetDoctor(ID, userID)
+	return res, nil
+}
+
+func (s *doctorService) SearchDoctors(searchArgs *models.Search) (*models.SearchDoctorsResponse, error) {
+	res, err := s.doctorRepo.SearchDoctors(searchArgs)
 	if err != nil {
-		log.Println(err)
+		s.logger.Error(err)
+		return nil, err
+	}
+	return res, nil
+}
+
+func (s *doctorService) GetDoctorByDepartment(ID int64, search *models.Search) (*models.SearchDoctorsResponse, error) {
+	res, err := s.doctorRepo.SearchDoctorsByDepartment(search, ID)
+	if err != nil {
+		s.logger.Error(err)
 		return nil, err
 	}
 	return res, nil

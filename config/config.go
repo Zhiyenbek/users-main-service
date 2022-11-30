@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/spf13/viper"
@@ -67,6 +68,7 @@ func New() (*Configs, error) {
 	err := vi.ReadInConfig()
 
 	if err != nil {
+		log.Println("abobus")
 		return nil, fmt.Errorf("error while parsing config. %v", err)
 	}
 	dbHost := vi.GetString("db.host")

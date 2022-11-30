@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/Zhiyenbek/users-main-service/config"
 	"github.com/Zhiyenbek/users-main-service/internal/models"
@@ -39,7 +38,7 @@ func (r *doctorRepository) CreateDoctor(doctor *models.CreateDoctorRequest) (*mo
 	if err != nil {
 		errTX := tx.Rollback(ctx)
 		if errTX != nil {
-			log.Printf("ERROR: transaction: %s", errTX)
+			return nil, fmt.Errorf("ERROR: transaction: %s", errTX)
 		}
 		return nil, fmt.Errorf("error occurred while creating doctor in users: %v", err)
 	}
@@ -48,22 +47,21 @@ func (r *doctorRepository) CreateDoctor(doctor *models.CreateDoctorRequest) (*mo
 		if err != nil {
 			errTX := tx.Rollback(ctx)
 			if errTX != nil {
-				log.Printf("ERROR: transaction: %s", errTX)
+				return nil, fmt.Errorf("ERROR: transaction: %s", errTX)
 			}
-			log.Println("ROOM TOOR")
 			return nil, fmt.Errorf("error occurred while scanning doctor in users: %v", err)
 		}
 	}
 	dRow.Close()
 	query = `INSERT INTO doctors 
-		(department_id, spec_id, experience, photo, category, price, schedule, degree, rating, website_url, user_id)
+		(department_id, spec_id, experience, photo, category, price, schedule, degree, rating, website_url, id)
 			VALUES
 		($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id;`
 	dRow, err = tx.Query(ctx, query, doctor.DepartmentId, doctor.SpecId, doctor.Experience, doctor.Photo, doctor.Category, doctor.Price, doctor.Schedule, doctor.Degree, doctor.Rating, doctor.WebsiteUrl, userID)
 	if err != nil {
 		errTX := tx.Rollback(ctx)
 		if errTX != nil {
-			log.Printf("ERROR: transaction: %s", errTX)
+			return nil, fmt.Errorf("ERROR: transaction: %s", errTX)
 		}
 		return nil, fmt.Errorf("error occurred while creaing doctors in doctors: %v", err)
 	}
@@ -72,7 +70,7 @@ func (r *doctorRepository) CreateDoctor(doctor *models.CreateDoctorRequest) (*mo
 		if err != nil {
 			errTX := tx.Rollback(ctx)
 			if errTX != nil {
-				log.Printf("ERROR: transaction: %s", errTX)
+				return nil, fmt.Errorf("ERROR: transaction: %s", errTX)
 			}
 			return nil, fmt.Errorf("error occurred while creating doctors in doctors: %v", err)
 		}
@@ -82,7 +80,7 @@ func (r *doctorRepository) CreateDoctor(doctor *models.CreateDoctorRequest) (*mo
 	if err != nil {
 		errTX := tx.Rollback(ctx)
 		if errTX != nil {
-			log.Printf("ERROR: transaction error: %s", errTX)
+			return nil, fmt.Errorf("ERROR: transaction error: %s", errTX)
 		}
 		return nil, fmt.Errorf("error occurred while creating doctor: %v", err)
 	}
@@ -91,46 +89,22 @@ func (r *doctorRepository) CreateDoctor(doctor *models.CreateDoctorRequest) (*mo
 	}, nil
 }
 
-func (r *doctorRepository) DeleteDoctor(ID int64, userID int64) error {
+func (r *doctorRepository) DeleteDoctor(ID int64) error {
 	ctx, cancel := context.WithTimeout(context.Background(), r.cfg.TimeOut)
 	defer cancel()
 
-	tx, err := r.db.BeginTx(ctx, pgx.TxOptions{})
+	query := `DELETE FROM users WHERE id=$1`
+	rows, err := r.db.Exec(ctx, query, ID)
 	if err != nil {
-		return err
+		return fmt.Errorf("error occurred while deleting doctor: %v", err)
 	}
-
-	query := `DELETE FROM doctors WHERE id=$1`
-	_, err = tx.Exec(ctx, query, ID)
-	if err != nil {
-		errTX := tx.Rollback(ctx)
-		if errTX != nil {
-			log.Printf("ERROR: transaction error: %s", errTX)
-		}
-		return fmt.Errorf("error occurred while deleting doctor from doctors: %v", err)
-	}
-
-	query = `DELETE FROM users WHERE id=$1`
-	_, err = tx.Exec(ctx, query, userID)
-	if err != nil {
-		errTX := tx.Rollback(ctx)
-		if errTX != nil {
-			log.Printf("ERROR: transaction error: %s", errTX)
-		}
-		return fmt.Errorf("error occurred while deleting doctor from users: %v", err)
-	}
-	err = tx.Commit(ctx)
-	if err != nil {
-		errTX := tx.Rollback(ctx)
-		if errTX != nil {
-			log.Printf("ERROR: transaction error: %s", errTX)
-		}
-		return fmt.Errorf("error occurred while deleting doctor from users: %v", err)
+	if rows.RowsAffected() < 1 {
+		return fmt.Errorf("error: no doctor in db with such id %d", ID)
 	}
 	return nil
 }
 
-func (r *doctorRepository) UpdateDoctor(doctor *models.UpdateDoctorRequest, userID int64) error {
+func (r *doctorRepository) UpdateDoctor(doctor *models.UpdateDoctorRequest) error {
 	ctx, cancel := context.WithTimeout(context.Background(), r.cfg.TimeOut)
 	defer cancel()
 	tx, err := r.db.BeginTx(ctx, pgx.TxOptions{})
@@ -140,13 +114,13 @@ func (r *doctorRepository) UpdateDoctor(doctor *models.UpdateDoctorRequest, user
 	query := `UPDATE users 
 				SET first_name = $1, last_name = $2, middle_name = $3, birthdate = $4, iin = $5, phone = $6, address = $7, email = $8
 			  WHERE id = $9`
-	_, err = tx.Exec(ctx, query, doctor.FirstName, doctor.LastName, doctor.MiddleName, doctor.BirthDate, doctor.IIN, doctor.Phone, doctor.Address, doctor.Email, userID)
+	_, err = tx.Exec(ctx, query, doctor.FirstName, doctor.LastName, doctor.MiddleName, doctor.BirthDate, doctor.IIN, doctor.Phone, doctor.Address, doctor.Email, doctor.ID)
 	if err != nil {
 		errTX := tx.Rollback(ctx)
 		if errTX != nil {
-			log.Printf("ERROR: transaction: %s", errTX)
+			return fmt.Errorf("%w ERROR: transaction: %s", models.ErrInternalServer, errTX)
 		}
-		return fmt.Errorf("error occurred while updating doctor info in users table: %v", err)
+		return fmt.Errorf("%w error occurred while updating doctor info in users table: %v", models.ErrInternalServer, err)
 	}
 
 	query = `UPDATE doctors 
@@ -156,7 +130,7 @@ func (r *doctorRepository) UpdateDoctor(doctor *models.UpdateDoctorRequest, user
 	if err != nil {
 		errTX := tx.Rollback(ctx)
 		if errTX != nil {
-			log.Printf("ERROR: transaction: %s", errTX)
+			return fmt.Errorf("ERROR: transaction: %s", errTX)
 		}
 		return fmt.Errorf("error occurred while updating doctor INFO in doctors: %v", err)
 	}
@@ -164,79 +138,74 @@ func (r *doctorRepository) UpdateDoctor(doctor *models.UpdateDoctorRequest, user
 	if err != nil {
 		errTX := tx.Rollback(ctx)
 		if errTX != nil {
-			log.Printf("ERROR: transaction error: %s", errTX)
+			return fmt.Errorf("ERROR: transaction error: %s", errTX)
 		}
 		return fmt.Errorf("error occurred while deleting doctor from users: %v", err)
 	}
 	return nil
 }
 
-func (r *doctorRepository) GetDoctor(ID int64, UserID int64) (*models.GetDoctorResponse, error) {
-	res := &models.GetDoctorResponse{}
+func (r *doctorRepository) GetDoctor(ID int64) (*models.GetDoctorResponse, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), r.cfg.TimeOut)
 	defer cancel()
-	tx, err := r.db.BeginTx(ctx, pgx.TxOptions{})
-	if err != nil {
-		return nil, err
-	}
-	query := `SELECT first_name, last_name, middle_name, birthdate, iin, phone, address, email FROM users WHERE id=$1`
-	dRow, err := tx.Query(ctx, query, UserID)
-	if err != nil {
-		errTX := tx.Rollback(ctx)
-		if errTX != nil {
-			log.Printf("ERROR: transaction: %s", errTX)
-		}
-		return nil, err
-	}
 
-	if dRow.Next() {
-		err = dRow.Scan(&res.FirstName, &res.LastName, &res.MiddleName, &res.BirthDate, &res.IIN, &res.Phone, &res.Address, &res.Email)
-		if err != nil {
-			errTX := tx.Rollback(ctx)
-			if errTX != nil {
-				log.Printf("ERROR: transaction: %s", errTX)
-			}
-			return nil, fmt.Errorf("error occurred while getting patient INFO from users: %v", err)
-		}
-	}
-	dRow.Close()
-	query = `SELECT department_id, spec_id, experience, photo, category, price, schedule, degree, rating, website_url FROM doctors WHERE id=$1`
-	dRow, err = tx.Query(ctx, query, ID)
+	query := `SELECT
+				users.id,
+				users.first_name,
+				users.last_name,
+				users.middle_name,
+				users.birthdate,
+				users.phone,
+				users.address,
+				departments.name,
+				specs.name,
+				doctors.experience,
+				doctors.photo,
+				doctors.category,
+				doctors.price,
+				doctors.degree,
+				doctors.rating
+			FROM
+				users
+				INNER JOIN doctors ON doctors.id = users.id
+				INNER JOIN specs ON doctors.spec_id = specs.id
+				INNER JOIN departments ON doctors.department_id = departments.id
+			WHERE
+				users.ID = $1
+			`
+	response := &models.GetDoctorResponse{}
+	err := r.db.QueryRow(ctx, query, ID).Scan(
+		&response.ID,
+		&response.FirstName,
+		&response.LastName,
+		&response.MiddleName,
+		&response.BirthDate,
+		&response.Phone,
+		&response.Address,
+		&response.Department,
+		&response.Spec,
+		&response.Experience,
+		&response.Phone,
+		&response.Category,
+		&response.Price,
+		&response.Degree,
+		&response.Rating,
+	)
 	if err != nil {
-		errTX := tx.Rollback(ctx)
-		if errTX != nil {
-			log.Printf("ERROR: transaction: %s", errTX)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, fmt.Errorf("%w no doctors with such id in db", models.ErrDoctorNotFound)
 		}
-		return nil, fmt.Errorf("error occurred while getting doctor INFO from doctors: %v", err)
+		return nil, fmt.Errorf("%w error occured while getting doctors from db %v", models.ErrInternalServer, err)
 	}
-	if dRow.Next() {
-		err = dRow.Scan(&res.DepartmentId, &res.SpecId, &res.Experience, &res.Photo, &res.Category, &res.Price, &res.Schedule, &res.Degree, &res.Rating, &res.WebsiteUrl)
-		if err != nil {
-			errTX := tx.Rollback(ctx)
-			if errTX != nil {
-				log.Printf("ERROR: transaction: %s", errTX)
-			}
-			return nil, fmt.Errorf("error occurred while getting doctor INFO from doctors: %v", err)
-		}
-	}
-	res.ID = ID
-	dRow.Close()
-	err = tx.Commit(ctx)
-	if err != nil {
-		errTX := tx.Rollback(ctx)
-		if errTX != nil {
-			log.Printf("ERROR: transaction error: %s", errTX)
-		}
-		return nil, fmt.Errorf("error occurred while deleting doctor from users: %v", err)
-	}
-	return res, nil
+	return response, nil
 }
+
 func (r *doctorRepository) GetAllDoctors() ([]*models.GetAllDoctorsResponse, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), r.cfg.TimeOut)
 	defer cancel()
 	var userID int64
 	var first_name, last_name string
-	query := `SELECT users.id, first_name, last_name FROM users JOIN doctors ON user_id=users.id`
+	query := `SELECT users.id, first_name, last_name FROM users JOIN doctors ON id=users.id`
 
 	rows, err := r.db.Query(ctx, query)
 	if err != nil {
@@ -262,18 +231,169 @@ func (r *doctorRepository) GetAllDoctors() ([]*models.GetAllDoctorsResponse, err
 	}
 	return result, nil
 }
-func (r *doctorRepository) GetUserIDbyID(ID int64) (int64, error) {
+
+func (r *doctorRepository) SearchDoctors(searchArgs *models.Search) (*models.SearchDoctorsResponse, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), r.cfg.TimeOut)
 	defer cancel()
-	var userID int64
-	query := `SELECT user_id FROM doctors where id = $1`
-
-	err := r.db.QueryRow(ctx, query, ID).Scan(&userID)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return -1, fmt.Errorf("%w error occurred while getting userID from doctors: %v", models.ErrPatientNotFound, err)
-		}
-		return -1, fmt.Errorf("error occurred while getting userID from doctors: %v", err)
+	offset := (searchArgs.PageNum - 1) * searchArgs.PageSize
+	if offset < 0 {
+		offset = 0
 	}
-	return userID, nil
+
+	query := `SELECT
+				users.id,
+				users.first_name,
+				users.last_name,
+				users.middle_name,
+				users.birthdate,
+				users.phone,
+				users.address,
+				departments.name,
+				specs.name,
+				doctors.experience,
+				doctors.photo,
+				doctors.category,
+				doctors.price,
+				doctors.degree,
+				doctors.rating
+			FROM
+				users
+				INNER JOIN doctors ON doctors.id = users.id
+				INNER JOIN specs ON doctors.spec_id = specs.id
+				INNER JOIN departments ON doctors.department_id = departments.id
+			WHERE
+				users.first_name ILIKE '%' || $1 || '%' OR users.last_name ILIKE '%' || $1 || '%' OR departments.name ILIKE '%' || $1 || '%' OR specs.name ILIKE '%' || $1 || '%'
+			LIMIT $2 OFFSET $3 
+			`
+
+	rows, err := r.db.Query(ctx, query, searchArgs.Search, searchArgs.PageSize, offset)
+	if err != nil {
+		return nil, fmt.Errorf("error while searching doctors: %v", err)
+	}
+	defer rows.Close()
+	var res []*models.GetDoctorResponse
+	for rows.Next() {
+		response := &models.GetDoctorResponse{}
+		if err = rows.Scan(
+			&response.ID,
+			&response.FirstName,
+			&response.LastName,
+			&response.MiddleName,
+			&response.BirthDate,
+			&response.Phone,
+			&response.Address,
+			&response.Department,
+			&response.Spec,
+			&response.Experience,
+			&response.Phone,
+			&response.Category,
+			&response.Price,
+			&response.Degree,
+			&response.Rating,
+		); err != nil {
+			return nil, fmt.Errorf("error while searching doctors in scan: %v", err)
+		}
+		res = append(res, response)
+	}
+	var count int
+	query = `SELECT 
+				COUNT(*)
+			FROM 
+				users 
+					INNER JOIN doctors ON doctors.id = users.id 
+					INNER JOIN specs ON doctors.spec_id = specs.id 
+					INNER JOIN departments ON doctors.department_id = departments.id
+			WHERE
+				users.first_name ILIKE '%' || $1 || '%' OR users.last_name ILIKE '%' || $1 || '%' OR departments.name ILIKE '%' || $1 || '%' OR specs.name ILIKE '%' || $1 || '%'`
+	err = r.db.QueryRow(ctx, query, searchArgs.Search).Scan(&count)
+	if err != nil {
+		return nil, fmt.Errorf("error occured while scanning count in search %v", err)
+	}
+	return &models.SearchDoctorsResponse{
+		Doctors: res,
+		Count:   count,
+	}, nil
+}
+
+func (r *doctorRepository) SearchDoctorsByDepartment(searchArgs *models.Search, ID int64) (*models.SearchDoctorsResponse, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), r.cfg.TimeOut)
+	defer cancel()
+	offset := (searchArgs.PageNum - 1) * searchArgs.PageSize
+	if offset < 0 {
+		offset = 0
+	}
+
+	query := `SELECT
+				users.id,
+				users.first_name,
+				users.last_name,
+				users.middle_name,
+				users.birthdate,
+				users.phone,
+				users.address,
+				departments.name,
+				specs.name,
+				doctors.experience,
+				doctors.photo,
+				doctors.category,
+				doctors.price,
+				doctors.degree,
+				doctors.rating
+			FROM
+				users
+				INNER JOIN doctors ON doctors.id = users.id
+				INNER JOIN specs ON doctors.spec_id = specs.id
+				INNER JOIN departments ON doctors.department_id = departments.id
+			WHERE
+				doctors.department_id = $1
+			LIMIT $2 OFFSET $3 
+			`
+
+	rows, err := r.db.Query(ctx, query, ID, searchArgs.PageSize, offset)
+	if err != nil {
+		return nil, fmt.Errorf("error while searching doctors: %v", err)
+	}
+	defer rows.Close()
+	var res []*models.GetDoctorResponse
+	for rows.Next() {
+		response := &models.GetDoctorResponse{}
+		if err = rows.Scan(
+			&response.ID,
+			&response.FirstName,
+			&response.LastName,
+			&response.MiddleName,
+			&response.BirthDate,
+			&response.Phone,
+			&response.Address,
+			&response.Department,
+			&response.Spec,
+			&response.Experience,
+			&response.Phone,
+			&response.Category,
+			&response.Price,
+			&response.Degree,
+			&response.Rating,
+		); err != nil {
+			return nil, fmt.Errorf("error while searching doctors by department in scan: %v", err)
+		}
+		res = append(res, response)
+	}
+	var count int
+	query = `SELECT 
+				COUNT(*)
+			FROM 
+				users 
+					INNER JOIN doctors ON doctors.id = users.id 
+					INNER JOIN specs ON doctors.spec_id = specs.id 
+					INNER JOIN departments ON doctors.department_id = departments.id
+			WHERE
+				doctors.department_id = $1`
+	err = r.db.QueryRow(ctx, query, ID).Scan(&count)
+	if err != nil {
+		return nil, fmt.Errorf("error occured while scanning count in search %v", err)
+	}
+	return &models.SearchDoctorsResponse{
+		Doctors: res,
+		Count:   count,
+	}, nil
 }

@@ -2,7 +2,6 @@ package handler
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/Zhiyenbek/users-main-service/internal/models"
@@ -31,13 +30,13 @@ func parseAuthToken(tokenString string, tokenSecret string) (*models.Token, erro
 func (h *handler) VerifyToken(c *gin.Context) {
 	jwtToken, err := c.Cookie("access_token")
 	if err != nil {
-		log.Println(err)
+		h.logger.Error(err)
 		c.AbortWithStatusJSON(401, sendResponse(-1, nil, models.ErrInvalidToken))
 		return
 	}
 	_, err = parseAuthToken(jwtToken, h.cfg.Token.Access.TokenSecret)
 	if err != nil {
-		log.Println(err)
+		h.logger.Error(err)
 		c.AbortWithStatusJSON(401, sendResponse(-1, nil, models.ErrInvalidToken))
 		return
 	}

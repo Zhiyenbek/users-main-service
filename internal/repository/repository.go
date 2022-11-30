@@ -15,18 +15,18 @@ type Repository struct {
 }
 type DoctorRepository interface {
 	CreateDoctor(doctor *models.CreateDoctorRequest) (*models.CreateDoctorResponse, error)
-	DeleteDoctor(ID int64, userID int64) error
-	UpdateDoctor(doctor *models.UpdateDoctorRequest, userID int64) error
-	GetDoctor(ID int64, UserID int64) (*models.GetDoctorResponse, error)
-	GetUserIDbyID(ID int64) (int64, error)
+	DeleteDoctor(ID int64) error
+	UpdateDoctor(doctor *models.UpdateDoctorRequest) error
+	GetDoctor(ID int64) (*models.GetDoctorResponse, error)
+	SearchDoctors(*models.Search) (*models.SearchDoctorsResponse, error)
+	SearchDoctorsByDepartment(*models.Search, int64) (*models.SearchDoctorsResponse, error)
 }
 
 type PatientRepository interface {
 	CreatePatient(patient *models.CreatePatientRequest) (*models.CreatePatientResponse, error)
-	DeletePatient(ID int64, userID int64) error
-	UpdatePatient(patient *models.UpdatePatientRequest, userID int64) error
-	GetPatient(ID int64, UserID int64) (*models.GetPatientResponse, error)
-	GetUserIDbyID(ID int64) (int64, error)
+	DeletePatient(ID int64) error
+	UpdatePatient(patient *models.UpdatePatientRequest) error
+	GetPatient(ID int64) (*models.GetPatientResponse, error)
 }
 
 type AuthRepository interface {

@@ -9,30 +9,33 @@ import (
 	"github.com/Zhiyenbek/users-main-service/internal/models"
 	"github.com/Zhiyenbek/users-main-service/internal/repository"
 	"github.com/dgrijalva/jwt-go"
+	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type authService struct {
 	cfg       *config.Configs
+	logger    *zap.SugaredLogger
 	authRepo  repository.AuthRepository
 	tokenRepo repository.TokenRepository
 }
 
-func NewAuthService(repo *repository.Repository, cfg *config.Configs) AuthService {
+func NewAuthService(repo *repository.Repository, cfg *config.Configs, logger *zap.SugaredLogger) AuthService {
 	return &authService{
 		authRepo:  repo.AuthRepository,
 		tokenRepo: repo.TokenRepository,
 		cfg:       cfg,
+		logger:    logger,
 	}
 }
 
 func (s *authService) Login(creds *models.UserSignInRequest) (*models.Tokens, error) {
 	pass, userID, err := s.authRepo.GetUserInfoByLogin(creds.Login)
 	if err != nil {
-		log.Println(err)
+		s.logger.Error(err)
 		return nil, err
 	}
-
+	log.Print(creds.Password)
 	if !checkPasswordHash(creds.Password, pass) {
 		log.Println("password not matched!")
 		return nil, models.ErrWrongPassword
@@ -111,7 +114,7 @@ func (s *authService) parseToken(tokenString string, tokenSecret string) (*model
 		return []byte(tokenSecret), nil
 	})
 	if err != nil {
-		log.Println(err)
+		s.logger.Error(err)
 		return nil, fmt.Errorf("could not parse token: %v %w", err, models.ErrInvalidToken)
 	}
 	if claims, ok := token.Claims.(*models.JwtUserClaims); ok && token.Valid {
@@ -126,27 +129,27 @@ func (s *authService) parseToken(tokenString string, tokenSecret string) (*model
 func (s *authService) RefreshToken(tokenString string) (*models.Tokens, error) {
 	token, err := s.parseToken(tokenString, s.cfg.Token.Refresh.TokenSecret)
 	if err != nil {
-		log.Println(err)
+		s.logger.Error(err)
 		return nil, err
 	}
 	redisTokenString, err := s.tokenRepo.GetToken(token.UserID)
 	if err != nil {
-		log.Println(err)
+		s.logger.Error(err)
 		return nil, err
 	}
 	if tokenString != redisTokenString {
-		log.Println(err)
+		s.logger.Errorf("token is unmatched. Wanted %s. Got: %s", tokenString, redisTokenString)
 		return nil, models.ErrTokenExpired
 	}
 	err = s.tokenRepo.UnsetRTToken(token.UserID)
 	if err != nil {
-		log.Println(err)
+		s.logger.Error(err)
 		return nil, err
 	}
 	tokens, err := s.generateTokens(token.UserID)
 
 	if err != nil {
-		log.Println(err)
+		s.logger.Error(err)
 		return nil, err
 	}
 	return tokens, nil
@@ -156,17 +159,17 @@ func (s *authService) RefreshToken(tokenString string) (*models.Tokens, error) {
 func (s *authService) generateTokens(userID int64) (*models.Tokens, error) {
 	accessToken, err := createAccessToken(userID, s.cfg.Token.Access.ExpiresAt, s.cfg.Token.Access.TokenSecret)
 	if err != nil {
-		log.Println(err)
+		s.logger.Error(err)
 		return nil, err
 	}
 	refreshToken, err := createRefreshToken(userID, s.cfg.Token.Refresh.ExpiresAt, s.cfg.Token.Refresh.TokenSecret)
 	if err != nil {
-		log.Println(err)
+		s.logger.Error(err)
 		return nil, err
 	}
 	err = s.tokenRepo.SetRTToken(refreshToken)
 	if err != nil {
-		log.Println(err)
+		s.logger.Error(err)
 		return nil, err
 	}
 	tokens := &models.Tokens{AccessToken: accessToken, RefreshToken: refreshToken}

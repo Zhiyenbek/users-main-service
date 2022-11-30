@@ -4,6 +4,7 @@ import (
 	"github.com/Zhiyenbek/users-main-service/config"
 	"github.com/Zhiyenbek/users-main-service/internal/models"
 	"github.com/Zhiyenbek/users-main-service/internal/repository"
+	"go.uber.org/zap"
 )
 
 type DoctorService interface {
@@ -11,6 +12,8 @@ type DoctorService interface {
 	CreateDoctor(doctorReq *models.CreateDoctorRequest) (*models.CreateDoctorResponse, error)
 	DeleteDoctor(ID int64) error
 	GetDoctor(ID int64) (*models.GetDoctorResponse, error)
+	SearchDoctors(*models.Search) (*models.SearchDoctorsResponse, error)
+	GetDoctorByDepartment(int64, *models.Search) (*models.SearchDoctorsResponse, error)
 }
 type PatientService interface {
 	UpdatePatient(patientReq *models.UpdatePatientRequest) error
@@ -29,10 +32,10 @@ type Service struct {
 	AuthService
 }
 
-func New(repos *repository.Repository, cfg *config.Configs) *Service {
+func New(repos *repository.Repository, log *zap.SugaredLogger, cfg *config.Configs) *Service {
 	return &Service{
-		PatientService: NewPatientService(repos, cfg),
-		DoctorService:  NewDoctorService(repos, cfg),
-		AuthService:    NewAuthService(repos, cfg),
+		PatientService: NewPatientService(repos, log, cfg),
+		DoctorService:  NewDoctorService(repos, log, cfg),
+		AuthService:    NewAuthService(repos, cfg, log),
 	}
 }
