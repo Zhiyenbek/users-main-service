@@ -33,7 +33,7 @@ func (r *doctorRepository) CreateDoctor(doctor *models.CreateDoctorRequest) (*mo
 	query := `INSERT INTO users 
 				(first_name, last_name, middle_name, birthdate, iin, phone, address, email)
 			VALUES
-				($1, $2, $3, $4, $5, $6, $7, $8) RETURNING ID;`
+				($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;`
 	dRow, err := tx.Query(ctx, query, doctor.FirstName, doctor.LastName, doctor.MiddleName, doctor.BirthDate, doctor.IIN, doctor.Phone, doctor.Address, doctor.Email)
 	if err != nil {
 		errTX := tx.Rollback(ctx)
@@ -172,6 +172,7 @@ func (r *doctorRepository) GetDoctor(ID int64) (*models.GetDoctorResponse, error
 				INNER JOIN departments ON doctors.department_id = departments.id
 			WHERE
 				users.ID = $1
+			ORDER BY users.id desc
 			`
 	response := &models.GetDoctorResponse{}
 	err := r.db.QueryRow(ctx, query, ID).Scan(
@@ -346,6 +347,7 @@ func (r *doctorRepository) SearchDoctorsByDepartment(searchArgs *models.Search, 
 				INNER JOIN departments ON doctors.department_id = departments.id
 			WHERE
 				doctors.department_id = $1
+			ORDER BY users.id desc
 			LIMIT $2 OFFSET $3 
 			`
 
