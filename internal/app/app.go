@@ -42,8 +42,9 @@ func Run() error {
 	repos := repository.New(db, cfg, redis)
 	services := service.New(repos, sugar, cfg)
 	handlers := handler.New(services, sugar, cfg)
+	// how to allow localhost support?
 	srv := http.Server{
-		Addr:    "swe-backend.heroku.com",
+		Addr:    "swe-backend.heroku.com:80",
 		Handler: handlers.InitRoutes(),
 	}
 	errChan := make(chan error, 1)
