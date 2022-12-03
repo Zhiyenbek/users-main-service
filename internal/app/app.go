@@ -44,7 +44,7 @@ func Run() error {
 	handlers := handler.New(services, sugar, cfg)
 	// how to allow localhost support?
 	srv := http.Server{
-		Addr:    "swe-backend.heroku.com:80",
+		Addr:    ":" + os.Getenv("PORT"),
 		Handler: handlers.InitRoutes(),
 	}
 	errChan := make(chan error, 1)
