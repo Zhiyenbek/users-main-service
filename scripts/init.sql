@@ -67,7 +67,6 @@ CREATE INDEX departments_idx_id ON "departments" ("id");
 CREATE INDEX doctors_idx_id ON "doctors" ("id");
 CREATE INDEX users_idx_id ON "users" ("id");
 
-INSERT INTO auth (login, password) VALUES('admin', '$2a$12$aJdxplWONcENmkOWWNahce6io526pkprBg9ZVE2jhozd2IgSrFKJe')
 INSERT INTO departments (name) VALUES ('Allergy and Immunology'), ('Dermatology and Skin'), ('Diagnostic Radiology'), ('Family Medicine'),
 ('Gastrology'), ('Neurology'), ('Ophtalmology'), ('Physical and Reahbilitation'), ('Radiation Oncology') ON CONFLICT DO NOTHING;
 INSERT INTO specs (name, description) VALUES ('Infectious', 'a'), ('Degenerative', 'a'), ('Blood', 'a'), ('Genetic', 'a'), ('Iatrogenic', 'a') ON CONFLICT DO NOTHING;
