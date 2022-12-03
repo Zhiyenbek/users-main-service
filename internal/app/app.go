@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 
 	"github.com/Zhiyenbek/users-main-service/config"
@@ -42,9 +43,16 @@ func Run() error {
 	repos := repository.New(db, cfg, redis)
 	services := service.New(repos, sugar, cfg)
 	handlers := handler.New(services, sugar, cfg)
-	// how to allow localhost support?
+
+	port, ok := os.LookupEnv("PORT")
+	if !ok {
+		log.Println("Couldn't get port. Using config port instead")
+		port = strconv.Itoa(cfg.App.Port)
+
+	}
+
 	srv := http.Server{
-		Addr:    ":" + os.Getenv("PORT"),
+		Addr:    ":" + port,
 		Handler: handlers.InitRoutes(),
 	}
 	errChan := make(chan error, 1)
