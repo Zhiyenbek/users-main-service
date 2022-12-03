@@ -165,3 +165,21 @@ func (h *handler) GetDepartments(c *gin.Context) {
 	}
 	c.JSON(200, sendResponse(0, res, nil))
 }
+
+func (h *handler) CreateAppointment(c *gin.Context) {
+	req := &models.CreateAppointmentRequest{}
+	if err := c.ShouldBindWith(req, binding.JSON); err != nil {
+		log.Printf("ERROR: invalid input, some fields are incorrect: %s\n", err.Error())
+		c.AbortWithStatusJSON(400, sendResponse(-1, nil, models.ErrInvalidInput))
+		return
+	}
+	resp, err := h.service.DoctorService.CreateAppointment(req)
+	if err != nil {
+		switch {
+		default:
+			c.AbortWithStatusJSON(500, sendResponse(-1, resp.Error, models.ErrInvalidInput))
+			return
+		}
+	}
+	c.JSON(201, sendResponse(0, resp, nil))
+}

@@ -48,6 +48,8 @@ func (h *handler) InitRoutes() *gin.Engine {
 	doctor.GET("/departments/:department_id", h.GetDoctorByDepartment)
 
 	doctor.GET("/departments", h.GetDepartments)
+
+	doctor.POST("/appointment", h.CreateAppointment)
 	return router
 }
 

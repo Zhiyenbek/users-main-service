@@ -81,3 +81,14 @@ func (s *doctorService) GetDepartments() (*models.GetDepartments, error) {
 	}
 	return res, nil
 }
+
+func (s *doctorService) CreateAppointment(req *models.CreateAppointmentRequest) (*models.CreateAppointmentResponse, error) {
+	res, err := s.doctorRepo.CreateAppointment(req)
+	if err != nil {
+		s.logger.Error(err)
+		return &models.CreateAppointmentResponse{
+			Error: err.Error(),
+		}, err
+	}
+	return res, nil
+}

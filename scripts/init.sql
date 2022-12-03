@@ -55,10 +55,10 @@ CREATE TABLE IF NOT EXISTS auth (
 );
 
 CREATE TABLE IF NOT EXISTS appointments (
-  user_id bigint not NULL,
   doc_id bigint not NULL,
   email text not NULL,
   phone text not NULL,
+  iin text not NULL, 
   reg_date date not NULL,
   reg_time time not NULL
 );

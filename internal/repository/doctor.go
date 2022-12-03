@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/Zhiyenbek/users-main-service/config"
 	"github.com/Zhiyenbek/users-main-service/internal/models"
@@ -421,4 +422,39 @@ func (r *doctorRepository) GetDepartments() (*models.GetDepartments, error) {
 	return &models.GetDepartments{
 		Departments: deps,
 	}, nil
+}
+
+func (r *doctorRepository) CreateAppointment(doctor *models.CreateAppointmentRequest) (*models.CreateAppointmentResponse, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), r.cfg.TimeOut)
+	defer cancel()
+
+	tx, err := r.db.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("error occurred while creating appointment: %v", err)
+	}
+
+	reg_date_formatted, err := time.Parse("2006-01-02", doctor.Reg_date)
+	if err != nil {
+		return nil, fmt.Errorf("error occurred while parsing the date in appointment: %v", err)
+	}
+
+	reg_time_formatted, err := time.Parse("15:04", doctor.Reg_time)
+	if err != nil {
+		return nil, fmt.Errorf("error occurred while parsing the time in appointment: %v", err)
+	}
+
+	query := `INSERT INTO appointments 
+				(doc_id, email, phone, iin, reg_date, reg_time)
+			VALUES
+				($1, $2, $3, $4, $5, $6);`
+	_, err = tx.Exec(ctx, query, doctor.Doctor_ID, doctor.Email, doctor.Phone, doctor.IIN, reg_date_formatted, reg_time_formatted)
+	if err != nil {
+		errTX := tx.Rollback(ctx)
+		if errTX != nil {
+			return nil, fmt.Errorf("ERROR: transaction: %s", errTX)
+		}
+		return nil, fmt.Errorf("error occurred while creating appointment: %v", err)
+	}
+
+	return &models.CreateAppointmentResponse{}, nil
 }
