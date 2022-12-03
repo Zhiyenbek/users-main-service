@@ -57,7 +57,7 @@ func Run() error {
 	}
 	errChan := make(chan error, 1)
 	go func(errChan chan<- error) {
-		sugar.Infof("server on port: %d have started", cfg.App.Port)
+		sugar.Infof("server on port: %d have started", port)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			sugar.Error(err)
 			errChan <- err
