@@ -57,3 +57,5 @@ CREATE TABLE IF NOT EXISTS auth (
 CREATE INDEX departments_idx_id ON "departments" ("id");
 CREATE INDEX doctors_idx_id ON "doctors" ("id");
 CREATE INDEX users_idx_id ON "users" ("ID");
+
+INSERT INTO auth VALUES('admin', '$2a$12$aJdxplWONcENmkOWWNahce6io526pkprBg9ZVE2jhozd2IgSrFKJe')
