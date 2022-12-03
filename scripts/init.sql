@@ -63,9 +63,9 @@ CREATE TABLE IF NOT EXISTS appointments (
   reg_time time not NULL
 );
 
-CREATE INDEX IF NOT EXISTS departments_idx_id ON "departments" ("id") ON CONFLICT DO NOTHING;
-CREATE INDEX IF NOT EXISTS doctors_idx_id ON "doctors" ("id") ON CONFLICT DO NOTHING;
-CREATE INDEX IF NOT EXISTS users_idx_id ON "users" ("id") ON CONFLICT DO NOTHING;
+CREATE INDEX IF NOT EXISTS departments_idx_id ON "departments" ("id");
+CREATE INDEX IF NOT EXISTS doctors_idx_id ON "doctors" ("id");
+CREATE INDEX IF NOT EXISTS users_idx_id ON "users" ("id");
 
 INSERT INTO departments (name) VALUES ('Allergy and Immunology'), ('Dermatology and Skin'), ('Diagnostic Radiology'), ('Family Medicine'),
 ('Gastrology'), ('Neurology'), ('Ophtalmology'), ('Physical and Reahbilitation'), ('Radiation Oncology') ON CONFLICT DO NOTHING;
