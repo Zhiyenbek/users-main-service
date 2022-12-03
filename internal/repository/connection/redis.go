@@ -12,7 +12,7 @@ import (
 func NewRedis(cfg *config.RedisConf) (*redis.Client, error) {
 	var client *redis.Client
 
-	redis_URL, ok := os.LookupEnv("REDIS_TLS_URL")
+	redis_URL, ok := os.LookupEnv("REDIS_URL")
 	if !ok {
 		log.Println("Couldn't get redis url. Continuing with config")
 		client = redis.NewClient(&redis.Options{
