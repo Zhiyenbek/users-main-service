@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 
 	"github.com/Zhiyenbek/users-main-service/config"
@@ -44,7 +43,7 @@ func Run() error {
 	services := service.New(repos, sugar, cfg)
 	handlers := handler.New(services, sugar, cfg)
 	srv := http.Server{
-		Addr:    ":" + strconv.Itoa(cfg.App.Port),
+		Addr:    "swe-backend.heroku.com",
 		Handler: handlers.InitRoutes(),
 	}
 	errChan := make(chan error, 1)
