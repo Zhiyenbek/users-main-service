@@ -1,7 +1,6 @@
 package service
 
 import (
-	"log"
 	"time"
 
 	"github.com/Zhiyenbek/users-main-service/config"
@@ -113,7 +112,7 @@ func (s *doctorService) GetAppointmentsByDate(bookArgs *models.Appointment) (*mo
 			continue
 		}
 		emptySlots = append(emptySlots, timeItFormatted)
-		log.Println(timeItFormatted)
+		// log.Println(timeItFormatted)
 	}
 	return &models.GetAppointmentsResponse{
 		EmptySlots: emptySlots,
