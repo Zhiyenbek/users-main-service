@@ -467,12 +467,12 @@ func (r *doctorRepository) GetBookedAppointmentsByDate(bookArgs *models.Appointm
 	defer cancel()
 
 	query := `SELECT
-				appointments.time
+				appointments.reg_time
 			FROM
 				appointments
 			WHERE
-				appointments.doc_id = $1 AND appointments.date = $2
-			ORDER BY appointments.time
+				appointments.doc_id = $1 AND appointments.reg_date = $2
+			ORDER BY appointments.reg_time
 			`
 
 	rows, err := r.db.Query(ctx, query, bookArgs.DoctorID, bookArgs.Date)
