@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS appointments;
+
 CREATE TABLE IF NOT EXISTS users (
   id bigserial,
   first_name text NOT NULL ,
