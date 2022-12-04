@@ -92,3 +92,16 @@ func (s *doctorService) CreateAppointment(req *models.CreateAppointmentRequest) 
 	}
 	return res, nil
 }
+
+func (s *doctorService) GetAppointmentsByDate(bookArgs *models.Appointment) (*models.GetAppointmentsResponse, error) {
+	res, err := s.doctorRepo.GetBookedAppointmentsByDate(bookArgs)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, err
+	}
+	// busines logic
+
+	return &models.GetAppointmentsResponse{
+		EmptySlots: res,
+	}, nil
+}

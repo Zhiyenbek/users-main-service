@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 type CreateDoctorRequest struct {
 	FirstName    string `json:"first_name" binding:"required"`
 	LastName     string `json:"last_name" binding:"required"`
@@ -101,4 +103,13 @@ type CreateAppointmentRequest struct {
 
 type CreateAppointmentResponse struct {
 	Error string `json:"error"`
+}
+
+type Appointment struct {
+	Date     time.Time `json:"reg_date"`
+	DoctorID int64     `json:"doctor_id"`
+}
+
+type GetAppointmentsResponse struct {
+	EmptySlots []string `json:"empty_slots"`
 }

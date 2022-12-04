@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"strconv"
+	"time"
 
 	"github.com/Zhiyenbek/users-main-service/internal/models"
 	"github.com/gin-gonic/gin"
@@ -182,4 +183,30 @@ func (h *handler) CreateAppointment(c *gin.Context) {
 		}
 	}
 	c.JSON(201, sendResponse(0, resp, nil))
+}
+
+func (h *handler) GetAppointmentsByDate(c *gin.Context) {
+	date := c.Query("date")
+	dateFormatted, err := time.Parse("2006-01-02", date)
+	if err != nil {
+		c.AbortWithStatusJSON(500, sendResponse(-1, nil, models.ErrInvalidInput))
+		return
+	}
+
+	doctorID, err := strconv.Atoi(c.Query("doctor_id"))
+	if err != nil {
+		c.AbortWithStatusJSON(500, sendResponse(-1, nil, models.ErrInvalidInput))
+		return
+	}
+	bookArgs := &models.Appointment{
+		DoctorID: int64(doctorID),
+		Date:     dateFormatted,
+	}
+
+	res, err := h.service.DoctorService.GetAppointmentsByDate(bookArgs)
+	if err != nil {
+		c.AbortWithStatusJSON(500, sendResponse(-1, nil, models.ErrInternalServer))
+		return
+	}
+	c.JSON(200, sendResponse(0, res, nil))
 }

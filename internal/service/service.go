@@ -16,6 +16,7 @@ type DoctorService interface {
 	GetDoctorByDepartment(int64, *models.Search) (*models.SearchDoctorsResponse, error)
 	GetDepartments() (*models.GetDepartments, error)
 	CreateAppointment(req *models.CreateAppointmentRequest) (*models.CreateAppointmentResponse, error)
+	GetAppointmentsByDate(bookArgs *models.Appointment) (*models.GetAppointmentsResponse, error)
 }
 type PatientService interface {
 	UpdatePatient(patientReq *models.UpdatePatientRequest) error

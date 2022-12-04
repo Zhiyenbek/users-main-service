@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/Zhiyenbek/users-main-service/config"
@@ -428,27 +429,20 @@ func (r *doctorRepository) CreateAppointment(doctor *models.CreateAppointmentReq
 	ctx, cancel := context.WithTimeout(context.Background(), r.cfg.TimeOut)
 	defer cancel()
 
+	var id int
 	tx, err := r.db.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("error occurred while creating appointment: %v", err)
 	}
 
-	reg_date_formatted, err := time.Parse("2006-01-02", doctor.Reg_date)
-	if err != nil {
-		return nil, fmt.Errorf("error occurred while parsing the date in appointment: %v", err)
-	}
-
-	reg_time_formatted, err := time.Parse("15:04", doctor.Reg_time)
-	if err != nil {
-		return nil, fmt.Errorf("error occurred while parsing the time in appointment: %v", err)
-	}
-
 	query := `INSERT INTO appointments 
 				(doc_id, email, phone, iin, reg_date, reg_time)
 			VALUES
-				($1, $2, $3, $4, $5, $6);`
-	_, err = tx.Exec(ctx, query, doctor.Doctor_ID, doctor.Email, doctor.Phone, doctor.IIN, reg_date_formatted, reg_time_formatted)
+				($1, $2, $3, $4, $5, $6) RETURNING doc_id;`
+	err = tx.QueryRow(ctx, query, doctor.Doctor_ID, doctor.Email, doctor.Phone, doctor.IIN, doctor.Reg_date, doctor.Reg_time).Scan(&id)
+	log.Println(id)
 	if err != nil {
+		log.Println(err)
 		errTX := tx.Rollback(ctx)
 		if errTX != nil {
 			return nil, fmt.Errorf("ERROR: transaction: %s", errTX)
@@ -456,5 +450,46 @@ func (r *doctorRepository) CreateAppointment(doctor *models.CreateAppointmentReq
 		return nil, fmt.Errorf("error occurred while creating appointment: %v", err)
 	}
 
+	err = tx.Commit(ctx)
+	if err != nil {
+		errTX := tx.Rollback(ctx)
+		if errTX != nil {
+			return nil, fmt.Errorf("ERROR: transaction error: %s", errTX)
+		}
+		return nil, fmt.Errorf("error occurred while creating appointment: %v", err)
+	}
+
 	return &models.CreateAppointmentResponse{}, nil
+}
+
+func (r *doctorRepository) GetBookedAppointmentsByDate(bookArgs *models.Appointment) ([]string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), r.cfg.TimeOut)
+	defer cancel()
+
+	query := `SELECT
+				appointments.time
+			FROM
+				appointments
+			WHERE
+				appointments.doc_id = $1 AND appointments.date = $2
+			ORDER BY appointments.time
+			`
+
+	rows, err := r.db.Query(ctx, query, bookArgs.DoctorID, bookArgs.Date)
+	if err != nil {
+		return nil, fmt.Errorf("error while getting booked appointments: %v", err)
+	}
+	defer rows.Close()
+	var res []string
+	for rows.Next() {
+		var time time.Time
+		if err = rows.Scan(
+			&time,
+		); err != nil {
+			return nil, fmt.Errorf("error while getting booked appointments in scan: %v", err)
+		}
+
+		res = append(res, time.Format("15:04"))
+	}
+	return res, nil
 }
