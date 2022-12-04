@@ -66,6 +66,3 @@ CREATE TABLE IF NOT EXISTS appointments (
 CREATE INDEX IF NOT EXISTS departments_idx_id ON "departments" ("id");
 CREATE INDEX IF NOT EXISTS doctors_idx_id ON "doctors" ("id");
 CREATE INDEX IF NOT EXISTS users_idx_id ON "users" ("id");
-
-DELETE FROM departments WHERE id > 8;
-DELETE FROM specs WHERE id > 5;
