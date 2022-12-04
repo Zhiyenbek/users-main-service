@@ -462,7 +462,7 @@ func (r *doctorRepository) CreateAppointment(doctor *models.CreateAppointmentReq
 	return &models.CreateAppointmentResponse{}, nil
 }
 
-func (r *doctorRepository) GetBookedAppointmentsByDate(bookArgs *models.Appointment) ([]string, error) {
+func (r *doctorRepository) GetBookedAppointmentsByDate(bookArgs *models.Appointment) (map[string]bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), r.cfg.TimeOut)
 	defer cancel()
 
@@ -480,7 +480,10 @@ func (r *doctorRepository) GetBookedAppointmentsByDate(bookArgs *models.Appointm
 		return nil, fmt.Errorf("error while getting booked appointments: %v", err)
 	}
 	defer rows.Close()
-	var res []string
+	res := map[string]bool{
+		"12:00": true,
+	}
+
 	for rows.Next() {
 		var time time.Time
 		if err = rows.Scan(
@@ -489,7 +492,7 @@ func (r *doctorRepository) GetBookedAppointmentsByDate(bookArgs *models.Appointm
 			return nil, fmt.Errorf("error while getting booked appointments in scan: %v", err)
 		}
 
-		res = append(res, time.Format("15:04"))
+		res[time.Format("15:04")] = true
 	}
 	return res, nil
 }

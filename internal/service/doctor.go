@@ -1,6 +1,8 @@
 package service
 
 import (
+	"time"
+
 	"github.com/Zhiyenbek/users-main-service/config"
 	"github.com/Zhiyenbek/users-main-service/internal/models"
 	"github.com/Zhiyenbek/users-main-service/internal/repository"
@@ -100,8 +102,18 @@ func (s *doctorService) GetAppointmentsByDate(bookArgs *models.Appointment) (*mo
 		return nil, err
 	}
 	// busines logic
-
+	timeIt, _ := time.Parse("15:04", "08:00")
+	endTime, _ := time.Parse("15:04", "18:00")
+	var emptySlots []string
+	for timeIt != endTime {
+		timeItFormatted := timeIt.Format("15:04")
+		if res[timeItFormatted] {
+			continue
+		}
+		emptySlots = append(emptySlots, timeItFormatted)
+		timeIt.Add(time.Hour)
+	}
 	return &models.GetAppointmentsResponse{
-		EmptySlots: res,
+		EmptySlots: emptySlots,
 	}, nil
 }
