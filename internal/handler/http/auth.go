@@ -37,7 +37,7 @@ func (h *handler) SignIn(c *gin.Context) {
 		c.JSON(200, sendResponse(-1, nil, errMsg))
 		return
 	}
-	c.SetCookie("access_token", tokens.AccessToken.TokenValue, int(tokens.AccessToken.ExpiresAt.Seconds()), "/", "swe.works", true, false)
+	c.SetCookie("access_token", tokens.AccessToken.TokenValue, int(tokens.AccessToken.ExpiresAt.Seconds()), "/", "swe.works", false, false)
 	c.SetCookie("refresh_token", tokens.RefreshToken.TokenValue, int(tokens.RefreshToken.ExpiresAt.Seconds()), "/refresh-token", "swe.works", true, false)
 	c.JSON(200, sendResponse(0, nil, nil))
 }

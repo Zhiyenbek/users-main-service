@@ -29,7 +29,7 @@ func New(services *service.Service, logger *zap.SugaredLogger, cfg *config.Confi
 func (h *handler) InitRoutes() *gin.Engine {
 	router := gin.Default()
 	c := cors.DefaultConfig()
-	c.AllowOrigins = []string{"https://app.swe.works", "https://backend.swe.works"}
+	c.AllowOrigins = []string{"https://app.swe.works", "https://backend.swe.works", "http://127.0.0.1:3000"}
 	c.ExposeHeaders = []string{"Set-Cookie"}
 	c.AllowCredentials = true
 	router.Use(cors.New(c))
