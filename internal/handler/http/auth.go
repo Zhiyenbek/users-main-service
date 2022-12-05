@@ -37,8 +37,8 @@ func (h *handler) SignIn(c *gin.Context) {
 		c.JSON(200, sendResponse(-1, nil, errMsg))
 		return
 	}
-	c.SetCookie("access_token", tokens.AccessToken.TokenValue, int(tokens.AccessToken.ExpiresAt.Seconds()), "/", "swe-backend.herokuapp.com", true, true)
-	c.SetCookie("refresh_token", tokens.RefreshToken.TokenValue, int(tokens.RefreshToken.ExpiresAt.Seconds()), "/refresh-token", "swe-backend.herokuapp.com", true, true)
+	c.SetCookie("access_token", tokens.AccessToken.TokenValue, int(tokens.AccessToken.ExpiresAt.Seconds()), "/", "backend.swe.works", true, true)
+	c.SetCookie("refresh_token", tokens.RefreshToken.TokenValue, int(tokens.RefreshToken.ExpiresAt.Seconds()), "/refresh-token", "backend.swe.works", true, true)
 	c.JSON(200, sendResponse(0, nil, nil))
 }
 func (h *handler) RefreshToken(c *gin.Context) {
@@ -52,8 +52,8 @@ func (h *handler) RefreshToken(c *gin.Context) {
 		c.AbortWithStatusJSON(401, sendResponse(-1, nil, models.ErrInvalidInput))
 		return
 	}
-	c.SetCookie("access_token", tokens.AccessToken.TokenValue, int(tokens.AccessToken.ExpiresAt.Seconds()), "/", "swe-backend.herokuapp.com", true, true)
-	c.SetCookie("refresh_token", tokens.RefreshToken.TokenValue, int(tokens.RefreshToken.ExpiresAt.Seconds()), "/refresh-token", "swe-backend.herokuapp.com", true, true)
+	c.SetCookie("access_token", tokens.AccessToken.TokenValue, int(tokens.AccessToken.ExpiresAt.Seconds()), "/", "backend.swe.works", true, true)
+	c.SetCookie("refresh_token", tokens.RefreshToken.TokenValue, int(tokens.RefreshToken.ExpiresAt.Seconds()), "/refresh-token", "backend.swe.works", true, true)
 	c.JSON(200, sendResponse(0, nil, nil))
 }
 
