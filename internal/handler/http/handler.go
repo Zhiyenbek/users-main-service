@@ -3,8 +3,8 @@ package handler
 import (
 	"github.com/Zhiyenbek/users-main-service/config"
 	"github.com/Zhiyenbek/users-main-service/internal/service"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	cors "github.com/rs/cors/wrapper/gin"
 	"go.uber.org/zap"
 )
 
@@ -28,7 +28,10 @@ func New(services *service.Service, logger *zap.SugaredLogger, cfg *config.Confi
 
 func (h *handler) InitRoutes() *gin.Engine {
 	router := gin.Default()
-	router.Use(cors.Default())
+	c := cors.DefaultConfig()
+	c.AllowOrigins = []string{"https://app.swe.works", "https://backend.swe.works"}
+	c.ExposeHeaders = []string{"Set-Cookie"}
+	router.Use(cors.New(c))
 	router.POST("/sign-in", h.SignIn)
 	router.POST("/refresh-token", h.RefreshToken)
 
