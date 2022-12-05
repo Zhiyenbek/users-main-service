@@ -28,7 +28,7 @@ func New(services *service.Service, logger *zap.SugaredLogger, cfg *config.Confi
 
 func (h *handler) InitRoutes() *gin.Engine {
 	router := gin.Default()
-	router.Use(cors.AllowAll())
+	router.Use(cors.Default())
 	router.POST("/sign-in", h.SignIn)
 	router.POST("/refresh-token", h.RefreshToken)
 
