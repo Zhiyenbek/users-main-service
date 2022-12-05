@@ -31,6 +31,7 @@ func (h *handler) InitRoutes() *gin.Engine {
 	c := cors.DefaultConfig()
 	c.AllowOrigins = []string{"https://app.swe.works", "https://backend.swe.works"}
 	c.ExposeHeaders = []string{"Set-Cookie"}
+	c.AllowCredentials = true
 	router.Use(cors.New(c))
 	router.POST("/sign-in", h.SignIn)
 	router.POST("/refresh-token", h.RefreshToken)
