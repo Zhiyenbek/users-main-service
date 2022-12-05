@@ -37,8 +37,8 @@ func (h *handler) SignIn(c *gin.Context) {
 		c.JSON(200, sendResponse(-1, nil, errMsg))
 		return
 	}
-	c.SetCookie("access_token", tokens.AccessToken.TokenValue, int(tokens.AccessToken.ExpiresAt.Seconds()), "/", "", false, false)
-	c.SetCookie("refresh_token", tokens.RefreshToken.TokenValue, int(tokens.RefreshToken.ExpiresAt.Seconds()), "/refresh-token", "", false, false)
+	c.SetCookie("access_token", tokens.AccessToken.TokenValue, int(tokens.AccessToken.ExpiresAt.Seconds()), "/", "", true, true)
+	c.SetCookie("refresh_token", tokens.RefreshToken.TokenValue, int(tokens.RefreshToken.ExpiresAt.Seconds()), "/refresh-token", "", true, true)
 	c.JSON(200, sendResponse(0, nil, nil))
 }
 func (h *handler) RefreshToken(c *gin.Context) {
@@ -52,8 +52,8 @@ func (h *handler) RefreshToken(c *gin.Context) {
 		c.AbortWithStatusJSON(401, sendResponse(-1, nil, models.ErrInvalidInput))
 		return
 	}
-	c.SetCookie("access_token", tokens.AccessToken.TokenValue, int(tokens.AccessToken.ExpiresAt.Seconds()), "/", "", false, false)
-	c.SetCookie("refresh_token", tokens.RefreshToken.TokenValue, int(tokens.RefreshToken.ExpiresAt.Seconds()), "/refresh-token", "", false, false)
+	c.SetCookie("access_token", tokens.AccessToken.TokenValue, int(tokens.AccessToken.ExpiresAt.Seconds()), "/", "", true, true)
+	c.SetCookie("refresh_token", tokens.RefreshToken.TokenValue, int(tokens.RefreshToken.ExpiresAt.Seconds()), "/refresh-token", "", true, true)
 	c.JSON(200, sendResponse(0, nil, nil))
 }
 
