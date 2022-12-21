@@ -54,6 +54,15 @@ CREATE TABLE IF NOT EXISTS auth (
   password text not NULL
 );
 
-CREATE INDEX departments_idx_id ON "departments" ("id");
-CREATE INDEX doctors_idx_id ON "doctors" ("id");
-CREATE INDEX users_idx_id ON "users" ("ID");
+CREATE TABLE IF NOT EXISTS appointments (
+  doc_id bigint not NULL,
+  email text not NULL,
+  phone text not NULL,
+  iin text not NULL, 
+  reg_date date not NULL,
+  reg_time time not NULL
+);
+
+CREATE INDEX IF NOT EXISTS departments_idx_id ON "departments" ("id");
+CREATE INDEX IF NOT EXISTS doctors_idx_id ON "doctors" ("id");
+CREATE INDEX IF NOT EXISTS users_idx_id ON "users" ("id");

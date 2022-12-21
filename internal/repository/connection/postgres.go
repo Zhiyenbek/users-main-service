@@ -3,6 +3,7 @@ package connection
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 
@@ -31,5 +32,15 @@ func NewPostgresDB(cfg *config.DBConf) (*pgxpool.Pool, error) {
 		return nil, err
 	}
 
+	c, ioErr := ioutil.ReadFile("./scripts/init.sql")
+	if ioErr != nil {
+		log.Println(ioErr)
+	} else {
+		sql := string(c)
+		_, err = pool.Exec(ctx, sql)
+		if err != nil {
+			log.Println(err)
+		}
+	}
 	return pool, nil
 }

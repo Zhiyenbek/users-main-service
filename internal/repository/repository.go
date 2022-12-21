@@ -21,6 +21,8 @@ type DoctorRepository interface {
 	SearchDoctors(*models.Search) (*models.SearchDoctorsResponse, error)
 	SearchDoctorsByDepartment(*models.Search, int64) (*models.SearchDoctorsResponse, error)
 	GetDepartments() (*models.GetDepartments, error)
+	CreateAppointment(req *models.CreateAppointmentRequest) (*models.CreateAppointmentResponse, error)
+	GetBookedAppointmentsByDate(bookArgs *models.Appointment) (map[string]bool, error)
 }
 
 type PatientRepository interface {

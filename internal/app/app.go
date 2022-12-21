@@ -43,13 +43,21 @@ func Run() error {
 	repos := repository.New(db, cfg, redis)
 	services := service.New(repos, sugar, cfg)
 	handlers := handler.New(services, sugar, cfg)
+
+	port, ok := os.LookupEnv("PORT")
+	if !ok {
+		log.Println("Couldn't get port. Using config port instead")
+		port = strconv.Itoa(cfg.App.Port)
+
+	}
+
 	srv := http.Server{
-		Addr:    ":" + strconv.Itoa(cfg.App.Port),
+		Addr:    ":" + port,
 		Handler: handlers.InitRoutes(),
 	}
 	errChan := make(chan error, 1)
 	go func(errChan chan<- error) {
-		sugar.Infof("server on port: %d have started", cfg.App.Port)
+		sugar.Infof("server on port: %d have started", port)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			sugar.Error(err)
 			errChan <- err

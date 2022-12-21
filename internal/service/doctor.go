@@ -1,6 +1,8 @@
 package service
 
 import (
+	"time"
+
 	"github.com/Zhiyenbek/users-main-service/config"
 	"github.com/Zhiyenbek/users-main-service/internal/models"
 	"github.com/Zhiyenbek/users-main-service/internal/repository"
@@ -80,4 +82,39 @@ func (s *doctorService) GetDepartments() (*models.GetDepartments, error) {
 		return nil, err
 	}
 	return res, nil
+}
+
+func (s *doctorService) CreateAppointment(req *models.CreateAppointmentRequest) (*models.CreateAppointmentResponse, error) {
+	res, err := s.doctorRepo.CreateAppointment(req)
+	if err != nil {
+		s.logger.Error(err)
+		return &models.CreateAppointmentResponse{
+			Error: err.Error(),
+		}, err
+	}
+	return res, nil
+}
+
+func (s *doctorService) GetAppointmentsByDate(bookArgs *models.Appointment) (*models.GetAppointmentsResponse, error) {
+	res, err := s.doctorRepo.GetBookedAppointmentsByDate(bookArgs)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, err
+	}
+	// busines logic
+	timeIt, _ := time.Parse("15:04", "08:00")
+	endTime, _ := time.Parse("15:04", "18:00")
+	var emptySlots []string
+	for timeIt != endTime {
+		timeIt = timeIt.Add(time.Hour)
+		timeItFormatted := timeIt.Format("15:04")
+		if res[timeItFormatted] {
+			continue
+		}
+		emptySlots = append(emptySlots, timeItFormatted)
+		// log.Println(timeItFormatted)
+	}
+	return &models.GetAppointmentsResponse{
+		EmptySlots: emptySlots,
+	}, nil
 }

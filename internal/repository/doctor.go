@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
+	"time"
 
 	"github.com/Zhiyenbek/users-main-service/config"
 	"github.com/Zhiyenbek/users-main-service/internal/models"
@@ -421,4 +423,76 @@ func (r *doctorRepository) GetDepartments() (*models.GetDepartments, error) {
 	return &models.GetDepartments{
 		Departments: deps,
 	}, nil
+}
+
+func (r *doctorRepository) CreateAppointment(doctor *models.CreateAppointmentRequest) (*models.CreateAppointmentResponse, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), r.cfg.TimeOut)
+	defer cancel()
+
+	var id int
+	tx, err := r.db.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("error occurred while creating appointment: %v", err)
+	}
+
+	query := `INSERT INTO appointments 
+				(doc_id, email, phone, iin, reg_date, reg_time)
+			VALUES
+				($1, $2, $3, $4, $5, $6) RETURNING doc_id;`
+	err = tx.QueryRow(ctx, query, doctor.Doctor_ID, doctor.Email, doctor.Phone, doctor.IIN, doctor.Reg_date, doctor.Reg_time).Scan(&id)
+	log.Println(id)
+	if err != nil {
+		log.Println(err)
+		errTX := tx.Rollback(ctx)
+		if errTX != nil {
+			return nil, fmt.Errorf("ERROR: transaction: %s", errTX)
+		}
+		return nil, fmt.Errorf("error occurred while creating appointment: %v", err)
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		errTX := tx.Rollback(ctx)
+		if errTX != nil {
+			return nil, fmt.Errorf("ERROR: transaction error: %s", errTX)
+		}
+		return nil, fmt.Errorf("error occurred while creating appointment: %v", err)
+	}
+
+	return &models.CreateAppointmentResponse{}, nil
+}
+
+func (r *doctorRepository) GetBookedAppointmentsByDate(bookArgs *models.Appointment) (map[string]bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), r.cfg.TimeOut)
+	defer cancel()
+
+	query := `SELECT
+				appointments.reg_time
+			FROM
+				appointments
+			WHERE
+				appointments.doc_id = $1 AND appointments.reg_date = $2
+			ORDER BY appointments.reg_time
+			`
+
+	rows, err := r.db.Query(ctx, query, bookArgs.DoctorID, bookArgs.Date)
+	if err != nil {
+		return nil, fmt.Errorf("error while getting booked appointments: %v", err)
+	}
+	defer rows.Close()
+	res := map[string]bool{
+		"12:00": true,
+	}
+
+	for rows.Next() {
+		var time time.Time
+		if err = rows.Scan(
+			&time,
+		); err != nil {
+			return nil, fmt.Errorf("error while getting booked appointments in scan: %v", err)
+		}
+
+		res[time.Format("15:04")] = true
+	}
+	return res, nil
 }

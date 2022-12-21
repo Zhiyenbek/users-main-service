@@ -28,15 +28,15 @@ func New(services *service.Service, logger *zap.SugaredLogger, cfg *config.Confi
 
 func (h *handler) InitRoutes() *gin.Engine {
 	router := gin.Default()
-	router.Use(cors.Default())
+	router.Use(cors.AllowAll())
 	router.POST("/sign-in", h.SignIn)
 	router.POST("/refresh-token", h.RefreshToken)
 
 	patient := router.Group("/patients", h.VerifyToken)
 
 	patient.PUT("/:patient_id", h.UpdatePatient)
-	patient.GET("/:patient_id", h.VerifyToken, h.GetPatient)
-	patient.POST("/sign-up", h.VerifyToken, h.RegisterPatient)
+	patient.GET("/:patient_id", h.GetPatient)
+	patient.POST("/sign-up", h.RegisterPatient)
 	patient.GET("/all", h.GetAllPatients)
 
 	doctor := router.Group("/doctors", h.VerifyToken)
@@ -48,6 +48,9 @@ func (h *handler) InitRoutes() *gin.Engine {
 	doctor.GET("/departments/:department_id", h.GetDoctorByDepartment)
 
 	doctor.GET("/departments", h.GetDepartments)
+
+	doctor.POST("/appointments", h.CreateAppointment)
+	doctor.GET("/appointments", h.GetAppointmentsByDate)
 	return router
 }
 

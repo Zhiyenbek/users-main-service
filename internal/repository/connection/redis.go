@@ -10,17 +10,24 @@ import (
 )
 
 func NewRedis(cfg *config.RedisConf) (*redis.Client, error) {
-	redis_URL, ok := os.LookupEnv("REDIS_TLS_URL")
+	var client *redis.Client
+
+	redis_URL, ok := os.LookupEnv("REDIS_URL")
 	if !ok {
-		log.Println("Couldn't get database url. Continuing with config")
-		redis_URL = cfg.Host + ":" + strconv.Itoa(cfg.Port)
+		log.Println("Couldn't get redis url. Continuing with config")
+		client = redis.NewClient(&redis.Options{
+			Addr: cfg.Host + ":" + strconv.Itoa(cfg.Port),
+			DB:   cfg.DB,
+		})
 	} else {
 		log.Println("Redis url: ", redis_URL)
+		opt, err := redis.ParseURL(redis_URL)
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
+		client = redis.NewClient(opt)
 	}
-
-	client := redis.NewClient(&redis.Options{
-		Addr: redis_URL,
-	})
 
 	_, err := client.Ping().Result()
 	if err != nil {
